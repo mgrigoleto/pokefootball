@@ -17,7 +17,7 @@ const Match = () => {
         LW: "LW",
         ST: "ST",
         RW: "RW",
-    });
+    })
 
     const userTeam = [
         { id: 6, name: "Charizard", position: Position.GK, overall: 82 },
@@ -31,7 +31,7 @@ const Match = () => {
         { id: 135, name: "Jolteon", position: Position.LW, overall: 88 },
         { id: 445, name: "Garchomp", position: Position.ST, overall: 90 },
         { id: 282, name: "Gardevoir", position: Position.RW, overall: 87 },
-    ];
+    ]
 
     const enemyTeam = [
         { id: 230, name: "Kingdra", position: Position.GK, overall: 73 },
@@ -45,7 +45,7 @@ const Match = () => {
         { id: 334, name: "Altaria", position: Position.LW, overall: 72 },
         { id: 160, name: "Feraligatr", position: Position.ST, overall: 73 },
         { id: 242, name: "Blissey", position: Position.RW, overall: 65 },
-    ];
+    ]
 
     const [score, setScore] = useState({ player: 0, enemy: 0 })
     const [activities, setActivities] = useState([])
@@ -263,7 +263,8 @@ const Match = () => {
                     onClick={() => simulateMatch()}
                     disabled={currentlySimulating}
                 >
-                    Start Game</button>
+                    Start Game
+                </button>
             </div>
             <div className='team-list'>
                 {enemyTeam?.map((player) => {

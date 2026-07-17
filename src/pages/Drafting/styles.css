@@ -1,0 +1,274 @@
+.drafting-container {
+    max-width: calc(100% - 150px);
+    margin: 0 auto;
+    height: 100%;
+    background: linear-gradient(135deg,
+            #050806 0%,
+            #0a160d 30%,
+            #050806 70%,
+            #010201 100%);
+    padding: 25px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 50px;
+    border-radius: 10px;
+}
+
+.drafting-container h1 {
+    margin: 0 0 0 0;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+.pokemon-wrapper, .team-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background-color: black;
+    padding: 50px 0;
+    border-radius: 10px;
+    height: 60vh;
+    overflow-y: auto;
+}
+
+.fifa-chosen-card-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    background: linear-gradient(135deg, #37d4a5 0%, #9ac0f9 40%, #538de4 60%, #9abbf9 100%);
+    box-sizing: border-box;
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #161616;
+    font-weight: bold;
+}
+
+.add-pokemon-icon {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    padding: 0 0 25px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+    color: white;
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.fifa-card-container {
+    cursor: grab;
+    position: relative;
+    width: 170px;
+    height: 260px;
+    clip-path: polygon(20% 0%, 80% 0%,
+            100% 8%, 100% 82%,
+            50% 98%,
+            0% 82%, 0% 8%);
+    filter: drop-shadow(0px 8px 10px rgba(0, 0, 0, 0.5));
+    transition: transform 0.3s ease;
+}
+
+.fifa-card-container:active {
+    cursor: grabbing;
+}
+
+.fifa-card-container:hover {
+    transform: translateY(-7px);
+}
+
+.fifa-card-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #161616;
+    font-weight: bold;
+}
+
+.fifa-card-content.legend {
+    background: linear-gradient(135deg, #ffe4ff 0%, #ffb2fb 40%, #f094f8 60%, #ffcffb 100%);
+    box-shadow: inset 0 0 15px rgb(162, 0, 255);
+}
+
+.fifa-card-content.gold {
+    background: linear-gradient(135deg, #d4af37 0%, #f9e19a 40%, #b38f2d 60%, #f9e19a 100%);
+    border-color: #f9e19a;
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.733);
+}
+
+.fifa-card-content.silver {
+    background: linear-gradient(135deg, #707a8a 0%, #e2e8f0 40%, #94a3b8 60%, #f1f5f9 100%);
+    border-color: #e2e8f0;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.473);
+}
+
+.fifa-card-content.bronze {
+    background: linear-gradient(135deg, #804a00 0%, #cd7f32 40%, #a05a00 60%, #e6a15c 100%);
+    border-color: #e6a15c;
+    box-shadow: inset 0 0 15px rgba(102, 53, 4, 0.4);
+}
+
+.card-top {
+    margin: -15px 0 0 0;
+    display: flex;
+    width: 90%;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.card-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.8;
+}
+
+.card-badge .rating {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.card-badge .position {
+    font-weight: 600;
+    font-size: 18px;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+.card-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.8;
+    font-weight: 600;
+}
+
+.img-skeleton {
+    width: 200px;
+    height: 90px;
+}
+
+.player-image-container {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    margin: 7px 0 0 0;
+    width: 70%;
+    height: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; 
+}
+
+.player-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.name {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    margin-top: 0px;
+    text-align: center;
+    width: 100%;
+}
+
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    letter-spacing: -1.6px;
+}
+
+.stat-col {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 15px;
+}
+
+.stat-col span {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    font-weight: 600;
+}
+
+.stat-col b {
+    letter-spacing: -0.5px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+}
+
+.flag-card {
+    width: 30px;
+    opacity: 0.8;
+    margin: 5px 0 -15px 0;
+}
+
+.ready-button {
+    background-color: rgb(224, 188, 27);
+    color: black;
+    border: none;
+    font-family: inherit;
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+        background-color: rgb(196, 162, 11);
+    }
+}
+
+.reset-button {
+    background-color: rgb(224, 188, 27);
+    color: black;
+    border: none;
+    font-family: inherit;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+        background-color: rgb(196, 162, 11);
+    }
+
+}
