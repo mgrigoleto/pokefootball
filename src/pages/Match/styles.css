@@ -1,0 +1,107 @@
+.match-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    height: 100%;
+    background: linear-gradient(135deg,
+            #050806 0%,
+            #0a160d 30%,
+            #050806 70%,
+            #010201 100%);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 50px;
+    border-radius: 10px;
+}
+
+.team-list {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background-color: black;
+    border-radius: 7px;
+    gap: 5px;
+}
+
+.team-list label {
+    color: white;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 18px;
+}
+
+.team-list b {
+    width: 40px;
+    color: rgb(224, 188, 27);
+}
+
+.team-list span {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.field-activities {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+}
+
+.score {
+    position: relative;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+    font-size: 30px;
+}
+
+.score .live-score {
+    position: absolute;
+    left: 50%;
+    font-size: 50px;
+    transform: translateX(-50%);
+}
+
+.score .player-name {
+    max-width: 13vw;
+    overflow: hidden;
+    color: rgb(97, 97, 255);
+}
+
+.score .enemy-name {
+    color: rgb(255, 30, 30);
+}
+
+.field-activities img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.match-activities {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    color: white;
+}
+
+.player-event {
+    width: 100%;
+    text-align: left;
+}
+
+.enemy-event {
+    width: 100%;
+    text-align: right;
+}
