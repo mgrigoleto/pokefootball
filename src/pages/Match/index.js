@@ -2,8 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import './styles.css'
 import field from '../../assets/field.png'
 import { IoFootball } from "react-icons/io5"
+import { useLocation } from "react-router-dom";
 
 const Match = () => {
+
+    const { state } = useLocation();
 
     const Position = Object.freeze({
         GK: "GK",
@@ -19,19 +22,7 @@ const Match = () => {
         RW: "RW",
     })
 
-    const userTeam = [
-        { id: 6, name: "Charizard", position: Position.GK, overall: 82 },
-        { id: 25, name: "Pikachu", position: Position.LB, overall: 79 },
-        { id: 143, name: "Snorlax", position: Position.LCB, overall: 85 },
-        { id: 149, name: "Dragonite", position: Position.RCB, overall: 81 },
-        { id: 448, name: "Lucario", position: Position.RB, overall: 78 },
-        { id: 3, name: "Venusaur", position: Position.CDM, overall: 84 },
-        { id: 9, name: "Blastoise", position: Position.CM, overall: 80 },
-        { id: 150, name: "Mewtwo", position: Position.CAM, overall: 86 },
-        { id: 135, name: "Jolteon", position: Position.LW, overall: 88 },
-        { id: 445, name: "Garchomp", position: Position.ST, overall: 90 },
-        { id: 282, name: "Gardevoir", position: Position.RW, overall: 87 },
-    ]
+    const [userTeam, setUserTeam] = useState(state.userTeam)
 
     const enemyTeam = [
         { id: 230, name: "Kingdra", position: Position.GK, overall: 73 },

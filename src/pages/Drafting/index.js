@@ -3,8 +3,12 @@ import './styles.css'
 import flag from '../../assets/japan-flag.png'
 import { FiPlusCircle } from "react-icons/fi";
 import { LuRefreshCw } from "react-icons/lu";
+import { FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Drafting = () => {
+
+    const navigate = useNavigate()
 
     const Position = Object.freeze({
         GK: "GK",
@@ -68,14 +72,16 @@ const Drafting = () => {
     ]
 
     const [pokemons, setPokemons] = useState([])
+    const [gotPokemonPool, setGotPokemonPool] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [userTeam, setUserTeam] = useState(initialTeamArray)
 
-    const getRandomPokemons = useCallback(async (amount = 30) => {
+    const getRandomPokemons = useCallback(async (amount = 32) => {
+        setPokemons([])
         const TOTAL_POKEMONS = 493
-        setLoading(true)
         setError(null)
+        setLoading(true)
 
         try {
             const randomIds = new Set()
@@ -115,6 +121,12 @@ const Drafting = () => {
                     special_attack,
                     special_defense,
                     speed,
+                    original_hp: hp,
+                    original_attack: attack,
+                    original_defense: defense,
+                    original_special_attack: special_attack,
+                    original_special_defense: special_defense,
+                    original_speed: speed,
                     overall
                 };
             });
@@ -124,16 +136,17 @@ const Drafting = () => {
             console.error("Error:", err)
             setError("Unable to load Pokémons.")
         } finally {
+            setGotPokemonPool(true)
             setLoading(false)
         }
     }, []);
 
     useEffect(() => {
-        getRandomPokemons(30);
-    }, [getRandomPokemons]);
+        !gotPokemonPool && getRandomPokemons();
+    }, []);
 
-    const recalculateOverall = (pokemon) => {
-        let newOverall = 0
+    const recalculateStats = (pokemon) => {
+        let updatedPokemon = pokemon
         if ([
             Position.GK,
             Position.LB,
@@ -141,21 +154,75 @@ const Drafting = () => {
             Position.LCB,
             Position.RCB
         ].includes(pokemon.position)) {
-            newOverall = Math.floor(((pokemon.hp * 1.2) + (pokemon.attack * 0.8) + (pokemon.defense * 1.2) + (pokemon.special_attack * 0.8) + (pokemon.special_defense * 1.2) + (pokemon.speed * 0.8)) / 6);
+            const hp = Math.round(pokemon.original_hp * 1.2)
+            const attack = Math.round(pokemon.original_attack * 0.8)
+            const defense = Math.round(pokemon.original_defense * 1.2)
+            const special_attack = Math.round(pokemon.original_special_attack * 0.8)
+            const special_defense = Math.round(pokemon.original_special_defense * 1.2)
+            const speed = Math.round(pokemon.original_speed * 0.8)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
         } else if ([
             Position.CDM,
             Position.CM,
             Position.CAM,
         ].includes(pokemon.position)) {
-            newOverall = Math.floor(((pokemon.hp * 1) + (pokemon.attack * 1) + (pokemon.defense * 1) + (pokemon.special_attack * 1) + (pokemon.special_defense * 1) + (pokemon.speed * 1)) / 6);
+            const hp = Math.round(pokemon.original_hp * 1.1)
+            const attack = Math.round(pokemon.original_attack * 1.1)
+            const defense = Math.round(pokemon.original_defense * 1.1)
+            const special_attack = Math.round(pokemon.original_special_attack * 0.9)
+            const special_defense = Math.round(pokemon.original_special_defense * 0.9)
+            const speed = Math.round(pokemon.original_speed * 0.9)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
         } else if ([
             Position.LW,
             Position.ST,
             Position.RW,
         ].includes(pokemon.position)) {
-            newOverall = Math.floor(((pokemon.hp * 0.8) + (pokemon.attack * 1.2) + (pokemon.defense * 0.8) + (pokemon.special_attack * 1.2) + (pokemon.special_defense * 0.8) + (pokemon.speed * 1.2)) / 6);
+            const hp = Math.round(pokemon.original_hp * 0.8)
+            const attack = Math.round(pokemon.original_attack * 1.2)
+            const defense = Math.round(pokemon.original_defense * 0.8)
+            const special_attack = Math.round(pokemon.original_special_attack * 1.2)
+            const special_defense = Math.round(pokemon.original_special_defense * 0.8)
+            const speed = Math.round(pokemon.original_speed * 1.2)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
         }
-        return newOverall
+        return updatedPokemon
     }
 
     const handleDragFromPool = (e, pokemon) => {
@@ -188,17 +255,17 @@ const Drafting = () => {
                 const sourceCard = { ...newTeam[sourceSlotIdx] };
                 const targetCard = { ...newTeam[targetSlotIdx] };
 
-                newTeam[sourceSlotIdx] = {
+                newTeam[sourceSlotIdx] = recalculateStats({
                     ...targetCard,
                     index: sourceCard.index,
                     position: sourceCard.position
-                };
+                });
 
-                newTeam[targetSlotIdx] = {
+                newTeam[targetSlotIdx] = recalculateStats({
                     ...sourceCard,
                     index: targetCard.index,
                     position: targetCard.position
-                };
+                });
 
                 return newTeam;
             });
@@ -212,17 +279,12 @@ const Drafting = () => {
             setUserTeam(prevTeam => prevTeam.map(slot => {
 
                 if (slot.index === targetIndex) {
-                    const newOverall = recalculateOverall({
+                    const updatedStats = recalculateStats({
                         ...droppedPokemon,
                         index: slot.index,
                         position: slot.position
                     })
-                    return {
-                        ...droppedPokemon,
-                        overall: newOverall,
-                        index: slot.index,
-                        position: slot.position
-                    };
+                    return updatedStats;
                 }
                 return slot;
             }));
@@ -235,173 +297,245 @@ const Drafting = () => {
     };
 
     return (
-        <div className='drafting-container'>
-            <div style={{ width: '40%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                    <h1>BUILD YOUR TEAM TEAM</h1>
-                    <button
-                        className='reset-button'
-                        onClick={() => setUserTeam(initialTeamArray)}
-                    >
-                        <LuRefreshCw />
-                    </button>
-                </div>
-                <div className='team-wrapper'>
-                    {userTeam?.map((pokemon) => {
-                        const ranking = getRankingClass(pokemon.overall);
+        <div style={{display: 'flex', flexDirection:'column'}}>
+            <div className='drafting-container'>
+                <div style={{ width: '50%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                        <h1>BUILD YOUR TEAM TEAM</h1>
+                        <button
+                            className='reset-button'
+                            onClick={() => setUserTeam(initialTeamArray)}
+                        >
+                            <FaTrash />
+                        </button>
+                    </div>
+                    <div className='team-wrapper'>
+                        {userTeam?.map((pokemon) => {
+                            const ranking = getRankingClass(pokemon.overall);
 
-                        return (
-                            <div
-                                key={pokemon.index}
-                                class={`fifa-card-container`}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, pokemon.index)}
-                                draggable={!!pokemon.name}
-                                onDragStart={(e) => handleDragFromTeam(e, pokemon.index)}
-                            >
-                                {
-                                    pokemon.name ?
-                                        <div className={`fifa-card-content ${ranking}`}>
-                                            <div className="card-top">
-                                                <div className="card-badge">
-                                                    <span className="rating">{pokemon.overall}</span>
-                                                    <span className="position">{pokemon.position}</span>
+                            return (
+                                <div
+                                    key={pokemon.index}
+                                    className={`fifa-card-container`}
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => handleDrop(e, pokemon.index)}
+                                    draggable={!!pokemon.name}
+                                    onDragStart={(e) => handleDragFromTeam(e, pokemon.index)}
+                                >
+                                    {
+                                        pokemon.name ?
+                                            <div className={`fifa-card-content ${ranking}`}>
+                                                <div className="card-top">
+                                                    <div className="card-badge">
+                                                        <span className="rating">{pokemon.overall}</span>
+                                                        <span className="position">{pokemon.position}</span>
+                                                    </div>
+                                                    <button
+                                                        className='remove-pokemon-button'
+                                                        onClick={() => setUserTeam((prev) =>
+                                                            prev.map((pkm) =>
+                                                                pkm.name === pokemon.name
+                                                                    ? { index: pokemon.index, position: pokemon.position }
+                                                                    : pkm
+                                                            )
+                                                        )}
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
                                                 </div>
-                                            </div>
-                                            <div className='img-skeleton'>
-                                            </div>
-                                            <div className="player-image-container">
-                                                <img className="player-image" src={pokemon.image} alt={pokemon.name} />
-                                            </div>
-
-                                            <label className="name">{pokemon.name}</label>
-
-                                            <div className="stats-grid">
-                                                <div className="stat-col">
-                                                    <span><b>HP</b></span>
-                                                    <span><b>ATK</b> </span>
-                                                    <span><b>DEF</b> </span>
-                                                    <span><b>SPA</b> </span>
-                                                    <span><b>SPD</b> </span>
-                                                    <span><b>SPE</b> </span>
+                                                <div className='img-skeleton'>
                                                 </div>
-                                                <div className="stat-col">
-                                                    <span>{pokemon.hp}</span>
-                                                    <span>{pokemon.attack}</span>
-                                                    <span>{pokemon.defense}</span>
-                                                    <span>{pokemon.special_attack}</span>
-                                                    <span>{pokemon.special_defense}</span>
-                                                    <span>{pokemon.speed}</span>
+                                                <div className="player-image-container">
+                                                    <img className="player-image" src={pokemon.image} alt={pokemon.name} />
                                                 </div>
-                                            </div>
-                                            <img className='flag-card' src={flag}></img>
-                                        </div>
-                                        :
-                                        <div className="fifa-chosen-card-content">
-                                            <div className="card-top">
-                                                <div className="card-badge">
-                                                    <span className="rating">??</span>
-                                                    <span className="position">{pokemon.position}</span>
+
+                                                <label className="name">{pokemon.name}</label>
+
+                                                <div className="stats-grid">
+                                                    <div className="stat-col">
+                                                        <span
+                                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
+                                                        ><b>HP</b> </span>
+                                                        <span
+                                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
+                                                        ><b>ATK</b> </span>
+                                                        <span
+                                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
+                                                        ><b>DEF</b> </span>
+                                                        <span
+                                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
+                                                        ><b>SPA</b> </span>
+                                                        <span
+                                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
+                                                        ><b>SPD</b> </span>
+                                                        <span
+                                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
+                                                        ><b>SPE</b> </span>
+                                                    </div>
+                                                    <div className="stat-col">
+                                                        <span
+                                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
+                                                        >{pokemon.hp}</span>
+                                                        <span
+                                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
+                                                        >{pokemon.attack}</span>
+                                                        <span
+                                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
+                                                        >{pokemon.defense}</span>
+                                                        <span
+                                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
+                                                        >{pokemon.special_attack}</span>
+                                                        <span
+                                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
+                                                        >{pokemon.special_defense}</span>
+                                                        <span
+                                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
+                                                        >{pokemon.speed}</span>
+                                                    </div>
                                                 </div>
+                                                <img className='flag-card' src={flag}></img>
                                             </div>
-                                            <div className='img-skeleton'>
-                                            </div>
-                                            <label className='add-pokemon-icon'><FiPlusCircle /></label>
-                                            <label className="name">POKÉMON NAME</label>
-
-                                            <div className="stats-grid">
-                                                <div className="stat-col">
-                                                    <span><b>HP</b></span>
-                                                    <span><b>ATK</b> </span>
-                                                    <span><b>DEF</b> </span>
-                                                    <span><b>SPA</b> </span>
-                                                    <span><b>SPD</b> </span>
-                                                    <span><b>SPE</b> </span>
+                                            :
+                                            <div className="fifa-chosen-card-content">
+                                                <div className="card-top">
+                                                    <div className="card-badge">
+                                                        <span className="rating">??</span>
+                                                        <span className="position">{pokemon.position}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="stat-col">
-                                                    <span>??</span>
-                                                    <span>??</span>
-                                                    <span>??</span>
-                                                    <span>??</span>
-                                                    <span>??</span>
-                                                    <span>??</span>
+                                                <div className='img-skeleton'>
                                                 </div>
+                                                <label className='add-pokemon-icon'><FiPlusCircle /></label>
+                                                <label className="name">POKÉMON NAME</label>
+
+                                                <div className="stats-grid">
+                                                    <div className="stat-col">
+                                                        <span><b>HP</b></span>
+                                                        <span><b>ATK</b> </span>
+                                                        <span><b>DEF</b> </span>
+                                                        <span><b>SPA</b> </span>
+                                                        <span><b>SPD</b> </span>
+                                                        <span><b>SPE</b> </span>
+                                                    </div>
+                                                    <div className="stat-col">
+                                                        <span>??</span>
+                                                        <span>??</span>
+                                                        <span>??</span>
+                                                        <span>??</span>
+                                                        <span>??</span>
+                                                        <span>??</span>
+                                                    </div>
+                                                </div>
+                                                <img className='flag-card' src={flag}></img>
+
                                             </div>
-                                            <img className='flag-card' src={flag}></img>
-
-                                        </div>
-                                }
-                            </div>
-                        )
-                    })
-                    }
-                </div>
-
-            </div>
-            <div style={{ width: '60%' }}>
-                <h1>GRAB THE POKÉMONS YOU WANT IN YOUR TEAM</h1>
-                <div className='pokemon-wrapper'>
-                    {pokemons?.map((pokemon) => {
-                        const ranking = getRankingClass(pokemon.overall);
-
-                        return (
-                            <div
-                                key={pokemon.id}
-                                class="fifa-card-container"
-                                draggable={true}
-                                onDragStart={(e) => handleDragFromPool(e, pokemon)}
-                            >
-                                <div className={`fifa-card-content ` + ranking}>
-
-                                    <div className="card-top">
-                                        <div className="card-badge">
-                                            <span className="rating">{pokemon.overall}</span>
-                                            <span className="position">??</span>
-                                        </div>
-                                    </div>
-                                    <div className='img-skeleton'>
-                                    </div>
-                                    <div className="player-image-container">
-                                        <img className="player-image" src={pokemon.image} alt={pokemon.name} />
-                                    </div>
-
-                                    <label className="name">{pokemon.name}</label>
-
-                                    <div className="stats-grid">
-                                        <div className="stat-col">
-                                            <span><b>HP</b></span>
-                                            <span><b>ATK</b> </span>
-                                            <span><b>DEF</b> </span>
-                                            <span><b>SPA</b> </span>
-                                            <span><b>SPD</b> </span>
-                                            <span><b>SPE</b> </span>
-                                        </div>
-                                        <div className="stat-col">
-                                            <span>{pokemon.hp}</span>
-                                            <span>{pokemon.attack}</span>
-                                            <span>{pokemon.defense}</span>
-                                            <span>{pokemon.special_attack}</span>
-                                            <span>{pokemon.special_defense}</span>
-                                            <span>{pokemon.speed}</span>
-                                        </div>
-                                    </div>
-                                    <img className='flag-card' src={flag}></img>
+                                    }
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })
+                        }
+                    </div>
+
                 </div>
+                <div style={{ width: '50%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                        <h1>GRAB THE POKÉMONS YOU WANT IN YOUR TEAM</h1>
+                        <button
+                            className='reset-button'
+                            onClick={() => getRandomPokemons()}
+                        >
+                            <LuRefreshCw />
+                        </button>
+                    </div>
+                    <div className='pokemon-wrapper'>
+                        {
+                            loading &&
+                            Array.from({ length: 32 }, (_, index) => ({
+                                id: index + 1,
+                            })).map((item) => {
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className="fifa-card-container"
+                                        draggable={false}
+                                    >
+                                        <div className={`fifa-card-content skeleton`}>
+                                            <span className="spinner-card"></span>
 
-            </div>
+                                        </div>
+                                    </div>
+                                )
 
-            {/* <button
+                            })
+                        }
+                        {pokemons?.map((pokemon) => {
+                            const ranking = getRankingClass(pokemon.overall);
+                            const blockedCard = userTeam.filter((pkm) => pkm.name == pokemon.name)?.length > 0
+
+                            return (
+                                <div
+                                    key={pokemon.id}
+                                    className={`fifa-card-container ` + `${blockedCard ? 'blocked' : ''}`}
+                                    draggable={!blockedCard}
+                                    onDragStart={(e) => handleDragFromPool(e, pokemon)}
+                                >
+                                    <div className={`fifa-card-content ` + ranking}>
+
+                                        <div className="card-top">
+                                            <div className="card-badge">
+                                                <span className="rating">{pokemon.overall}</span>
+                                                <span className="position">??</span>
+                                            </div>
+                                        </div>
+                                        <div className='img-skeleton'>
+                                        </div>
+                                        <div className="player-image-container">
+                                            <img className="player-image" src={pokemon.image} alt={pokemon.name} />
+                                        </div>
+
+                                        <label className="name">{pokemon.name}</label>
+
+                                        <div className="stats-grid">
+                                            <div className="stat-col">
+                                                <span><b>HP</b></span>
+                                                <span><b>ATK</b> </span>
+                                                <span><b>DEF</b> </span>
+                                                <span><b>SPA</b> </span>
+                                                <span><b>SPD</b> </span>
+                                                <span><b>SPE</b> </span>
+                                            </div>
+                                            <div className="stat-col">
+                                                <span>{pokemon.hp}</span>
+                                                <span>{pokemon.attack}</span>
+                                                <span>{pokemon.defense}</span>
+                                                <span>{pokemon.special_attack}</span>
+                                                <span>{pokemon.special_defense}</span>
+                                                <span>{pokemon.speed}</span>
+                                            </div>
+                                        </div>
+                                        <img className='flag-card' src={flag}></img>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </div >
+
+
+            <button
                 className='ready-button'
-                // onClick={() => simulateMatch()}
-                disabled={false}
+                onClick={() =>
+                    navigate("/match", {
+                        state: {
+                            userTeam,
+                        },
+                    })}
+                disabled={!userTeam.every((pkm) => pkm.name != undefined)}
             >
-                I'm ready
-            </button> */}
-        </div >
+                I'M READY!
+            </button>
+        </div>
     )
 }
 

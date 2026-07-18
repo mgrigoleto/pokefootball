@@ -1,6 +1,6 @@
 .drafting-container {
-    max-width: calc(100% - 150px);
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     height: 100%;
     background: linear-gradient(135deg,
             #050806 0%,
@@ -12,7 +12,6 @@
     flex-direction: row;
     justify-content: space-between;
     gap: 50px;
-    border-radius: 10px;
 }
 
 .drafting-container h1 {
@@ -21,7 +20,8 @@
     text-align: center;
 }
 
-.pokemon-wrapper, .team-wrapper {
+.pokemon-wrapper,
+.team-wrapper {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -31,7 +31,7 @@
     background-color: black;
     padding: 50px 0;
     border-radius: 10px;
-    height: 60vh;
+    height: calc(100vh - 345px);
     overflow-y: auto;
 }
 
@@ -101,6 +101,7 @@
     align-items: center;
     color: #161616;
     font-weight: bold;
+    background: red;
 }
 
 .fifa-card-content.legend {
@@ -124,6 +125,38 @@
     background: linear-gradient(135deg, #804a00 0%, #cd7f32 40%, #a05a00 60%, #e6a15c 100%);
     border-color: #e6a15c;
     box-shadow: inset 0 0 15px rgba(102, 53, 4, 0.4);
+}
+
+.fifa-card-content.skeleton{
+    background: linear-gradient(135deg, #804b0077 0%, #cd803279 40%, #a05b0080 60%, #e6a15c77 100%);
+    border-color: #e6a15c;
+}
+
+.fifa-card-container.blocked{
+    filter: brightness(0.4);
+    cursor: not-allowed;
+}
+
+.spinner-card {
+  --color-1: #fff;
+  --size: 1.3px;
+  width: calc(48 * var(--size));
+  height: calc(48 * var(--size));
+  border: calc(5 * var(--size)) solid var(--color-1);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .card-top {
@@ -170,13 +203,13 @@
     pointer-events: none;
     position: absolute;
     top: 0;
-    margin: 7px 0 0 0;
+    margin: 9px 0 0 0;
     width: 70%;
     height: 70%;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .player-image {
@@ -186,7 +219,7 @@
 }
 
 .name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: -0.5px;
@@ -210,6 +243,14 @@
     align-items: center;
     justify-content: space-between;
     line-height: 15px;
+}
+
+.buffed {
+    color: rgb(13, 0, 87);
+}
+
+.nerfed {
+    color: rgb(112, 0, 0);
 }
 
 .stat-col span {
@@ -239,9 +280,8 @@
     color: black;
     border: none;
     font-family: inherit;
-    padding: 10px 25px;
-    border-radius: 10px;
-    font-size: 18px;
+    padding: 15px 25px;
+    font-size: 36px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s ease-in-out;
@@ -261,7 +301,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 5px;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
@@ -269,6 +309,28 @@
 
     &:hover {
         background-color: rgb(196, 162, 11);
+    }
+
+}
+
+.remove-pokemon-button {
+    background-color: black;
+    color: white;
+    border: none;
+    font-family: inherit;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+    color: rgb(255, 72, 72);
     }
 
 }
