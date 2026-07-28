@@ -14,10 +14,15 @@
     gap: 50px;
 }
 
-.drafting-container h1 {
+.drafting-container h1, h2 {
+    user-select: none;
     margin: 0 0 0 0;
     letter-spacing: 0;
     text-align: center;
+}
+
+.drafting-container h2 {
+    font-weight: 400;
 }
 
 .pokemon-wrapper,
@@ -29,9 +34,9 @@
     justify-content: center;
     gap: 15px;
     background-color: black;
-    padding: 50px 0;
+    padding: 25px 0;
     border-radius: 10px;
-    height: calc(100vh - 345px);
+    height: calc(100vh - 200px);
     overflow-y: auto;
 }
 
@@ -71,13 +76,16 @@
     cursor: grab;
     position: relative;
     width: 170px;
-    height: 260px;
-    clip-path: polygon(20% 0%, 80% 0%,
+    height: 240px;
+    /* clip-path: polygon(20% 0%, 80% 0%,
             100% 8%, 100% 82%,
             50% 98%,
-            0% 82%, 0% 8%);
+            0% 82%, 0% 8%); */
     filter: drop-shadow(0px 8px 10px rgba(0, 0, 0, 0.5));
     transition: transform 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    user-select: none;
 }
 
 .fifa-card-container:active {
@@ -196,7 +204,7 @@
 
 .img-skeleton {
     width: 200px;
-    height: 90px;
+    height: 100px;
 }
 
 .player-image-container {

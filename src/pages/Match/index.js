@@ -3,40 +3,17 @@ import './styles.css'
 import field from '../../assets/field.png'
 import { IoFootball } from "react-icons/io5"
 import { useLocation } from "react-router-dom";
+import { Position } from '../../helpers/Enums';
 
 const Match = () => {
 
     const { state } = useLocation();
 
-    const Position = Object.freeze({
-        GK: "GK",
-        LB: "LB",
-        LCB: "LCB",
-        RCB: "RCB",
-        RB: "RB",
-        CDM: "CDM",
-        CM: "CM",
-        CAM: "CAM",
-        LW: "LW",
-        ST: "ST",
-        RW: "RW",
-    })
-
     const [userTeam, setUserTeam] = useState(state.userTeam)
 
-    const enemyTeam = [
-        { id: 230, name: "Kingdra", position: Position.GK, overall: 73 },
-        { id: 53, name: "Persian", position: Position.LB, overall: 70 },
-        { id: 89, name: "Muk", position: Position.LCB, overall: 75 },
-        { id: 112, name: "Rhydon", position: Position.RCB, overall: 72 },
-        { id: 214, name: "Heracross", position: Position.RB, overall: 69 },
-        { id: 282, name: "Gardevoir", position: Position.CDM, overall: 74 },
-        { id: 62, name: "Poliwrath", position: Position.CM, overall: 71 },
-        { id: 65, name: "Alakazam", position: Position.CAM, overall: 76 },
-        { id: 334, name: "Altaria", position: Position.LW, overall: 72 },
-        { id: 160, name: "Feraligatr", position: Position.ST, overall: 73 },
-        { id: 242, name: "Blissey", position: Position.RW, overall: 65 },
-    ]
+    const [enemyTeams, setEnemyTeams] = useState(state.aiTeams)
+
+    const [currEnemyTeam, setCurrEnemyTeam] = useState(state.aiTeams?.[0] ? state.aiTeams[0].players : [])
 
     const [score, setScore] = useState({ player: 0, enemy: 0 })
     const [activities, setActivities] = useState([])
@@ -60,6 +37,8 @@ const Match = () => {
                 return false
             }
         }
+
+
 
         const isGoalPenalty = () => {
             return Math.random() < 0.1
@@ -103,7 +82,7 @@ const Match = () => {
         }
 
         const enemyPower = {
-            defense: enemyTeam
+            defense: currEnemyTeam
                 .filter(player =>
                     [
                         Position.GK,
@@ -114,7 +93,7 @@ const Match = () => {
                     ].includes(player.position)
                 )
                 .reduce((total, player) => total + player.overall, 0),
-            midfield: enemyTeam
+            midfield: currEnemyTeam
                 .filter(player =>
                     [
                         Position.CDM,
@@ -123,7 +102,7 @@ const Match = () => {
                     ].includes(player.position)
                 )
                 .reduce((total, player) => total + player.overall, 0),
-            attack: enemyTeam
+            attack: currEnemyTeam
                 .filter(player =>
                     [
                         Position.LW,
@@ -136,7 +115,13 @@ const Match = () => {
 
         //#endregion
 
-        const eventMinutes = Array.from(
+        const possibleGoalsMinutes = Array.from(
+            new Set(
+                Array.from({ length: 20 }, () => Math.floor(Math.random() * 90) + 1)
+            )
+        ).sort((a, b) => a - b);
+
+        const possibleYellowCardsMinutes = Array.from(
             new Set(
                 Array.from({ length: 20 }, () => Math.floor(Math.random() * 90) + 1)
             )
@@ -150,7 +135,7 @@ const Match = () => {
         // Closer to zero means harder
         const difficultyMultipler = 0.8
 
-        for (let minute of eventMinutes) {
+        for (let minute of possibleGoalsMinutes) {
 
             // Get a random power value from the teams and apply the difficulty multiplier on it
             // Since the player will most likely always have a stronger team than the AI, I multiply the user's power by a random number between the difficulty base and 1 
@@ -181,11 +166,12 @@ const Match = () => {
                 if (goal) {
                     const wasItPenalty = isGoalPenalty()
 
-                    const playersWithoutGK = enemyTeam.filter(player => player.position !== Position.GK)
+                    const playersWithoutGK = currEnemyTeam?.filter(player => player.position !== Position.GK)
 
                     const randomPlayer = playersWithoutGK[Math.floor(Math.random() * playersWithoutGK.length)]
 
                     const actObj = {
+                        type: 'goal',
                         actor: 'enemy',
                         minute: minute,
                         description: `${randomPlayer.name} ${wasItPenalty ? ' (P)' : ''}`,
@@ -196,6 +182,7 @@ const Match = () => {
             }
         }
 
+        // Show the events
         for (let i = 0; i <= 90; i++) {
             setTimeout(() => {
                 setTime(i)
@@ -236,12 +223,11 @@ const Match = () => {
                     </label>
                     <span className='timer'>{time}'</span>
                 </div>
-                <img src={field}></img>
                 <div className='match-activities'>
                     {activities?.map((event) => {
                         return (
                             <>
-                                <label className={`${event.actor}-event `}>
+                                <label className={`${event.actor}-event ${event.type}`}>
                                     <IoFootball />
                                     {event.minute}' {event.description}
                                 </label>
@@ -258,7 +244,7 @@ const Match = () => {
                 </button>
             </div>
             <div className='team-list'>
-                {enemyTeam?.map((player) => {
+                {currEnemyTeam?.map((player) => {
                     return (
                         <label key={player.position}>
                             <b>{player.position}</b>

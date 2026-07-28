@@ -5,24 +5,11 @@ import { FiPlusCircle } from "react-icons/fi";
 import { LuRefreshCw } from "react-icons/lu";
 import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { Position } from '../../helpers/Enums';
 
 const Drafting = () => {
 
     const navigate = useNavigate()
-
-    const Position = Object.freeze({
-        GK: "GK",
-        LB: "LB",
-        LCB: "LCB",
-        RCB: "RCB",
-        RB: "RB",
-        CDM: "CDM",
-        CM: "CM",
-        CAM: "CAM",
-        LW: "LW",
-        ST: "ST",
-        RW: "RW",
-    })
 
     const initialTeamArray = [
         {
@@ -76,12 +63,11 @@ const Drafting = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [userTeam, setUserTeam] = useState(initialTeamArray)
+    const [refreshUsed, setRefreshUsed] = useState(0)
 
-    const getRandomPokemons = useCallback(async (amount = 32) => {
-        setPokemons([])
+    const fetchPokemons = useCallback(async (amount = 16) => {
         const TOTAL_POKEMONS = 493
-        setError(null)
-        setLoading(true)
+        let foundPokemons = []
 
         try {
             const randomIds = new Set()
@@ -131,6 +117,27 @@ const Drafting = () => {
                 };
             });
 
+            foundPokemons = formattedPokemons
+        } catch (err) {
+            console.error("Error:", err)
+            setError("Unable to load Pokémons.")
+        } finally {
+            setGotPokemonPool(true)
+            setLoading(false)
+        }
+
+        return foundPokemons
+    }, []);
+
+    const getRandomPokemons = useCallback(async (amount = 16) => {
+        setPokemons([])
+        const TOTAL_POKEMONS = 493
+        setError(null)
+        setLoading(true)
+
+        try {
+            const formattedPokemons = await fetchPokemons(amount)
+
             setPokemons(formattedPokemons)
         } catch (err) {
             console.error("Error:", err)
@@ -141,6 +148,31 @@ const Drafting = () => {
         }
     }, []);
 
+    const generateAITeams = async () => {
+        const enemyPokemons = await fetchPokemons(11)
+        const aiNames = ["Red", "Blue", "Cynthia", "Lance", "Brock", "Misty", "Steven"]
+        let enemies = []
+        for (let i = 0; i < 7; i++) {
+            enemies.push({
+                name: aiNames[i],
+                players:
+                    initialTeamArray.map((slot, idx) => {
+                        const rawPokemon = enemyPokemons[idx];
+
+                        const pokemonInSlot = {
+                            ...rawPokemon,
+                            index: slot.index,
+                            position: slot.position
+                        };
+
+                        return recalculateStats(pokemonInSlot);
+                    })
+            })
+        }
+        console.log('enemies', enemies)
+        return enemies
+    };
+
     useEffect(() => {
         !gotPokemonPool && getRandomPokemons();
     }, []);
@@ -149,6 +181,27 @@ const Drafting = () => {
         let updatedPokemon = pokemon
         if ([
             Position.GK,
+        ].includes(pokemon.position)) {
+            const hp = Math.round(pokemon.original_hp * 1.4)
+            const attack = Math.round(pokemon.original_attack * 0.6)
+            const defense = Math.round(pokemon.original_defense * 1.4)
+            const special_attack = Math.round(pokemon.original_special_attack * 0.6)
+            const special_defense = Math.round(pokemon.original_special_defense * 1.4)
+            const speed = Math.round(pokemon.original_speed * 0.6)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
+        } else if ([
             Position.LB,
             Position.RB,
             Position.LCB,
@@ -297,7 +350,7 @@ const Drafting = () => {
     };
 
     return (
-        <div style={{display: 'flex', flexDirection:'column'}}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className='drafting-container'>
                 <div style={{ width: '50%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
@@ -439,18 +492,23 @@ const Drafting = () => {
                 </div>
                 <div style={{ width: '50%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        <h1>GRAB THE POKÉMONS YOU WANT IN YOUR TEAM</h1>
+                        <h1>DRAG THE POKÉMONS TO YOUR TEAM</h1>
                         <button
                             className='reset-button'
-                            onClick={() => getRandomPokemons()}
+                            onClick={() => {
+                                setRefreshUsed(prev => prev + 1)
+                                getRandomPokemons()
+                            }}
+                        disabled={refreshUsed === 3}
                         >
                             <LuRefreshCw />
                         </button>
+                        <h2>{refreshUsed}/3</h2>
                     </div>
                     <div className='pokemon-wrapper'>
                         {
                             loading &&
-                            Array.from({ length: 32 }, (_, index) => ({
+                            Array.from({ length: 16 }, (_, index) => ({
                                 id: index + 1,
                             })).map((item) => {
                                 return (
@@ -525,12 +583,16 @@ const Drafting = () => {
 
             <button
                 className='ready-button'
-                onClick={() =>
+                onClick={async () => {
+                    const aiTeams = await generateAITeams()
+
                     navigate("/match", {
                         state: {
                             userTeam,
+                            aiTeams
                         },
-                    })}
+                    })
+                }}
                 disabled={!userTeam.every((pkm) => pkm.name != undefined)}
             >
                 I'M READY!
