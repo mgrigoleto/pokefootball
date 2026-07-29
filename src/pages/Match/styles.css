@@ -1,5 +1,5 @@
 .match-container {
-    width: 1200px;
+    width: 1400px;
     margin: 0 auto;
     height: 100%;
     background: linear-gradient(135deg,
@@ -21,10 +21,30 @@
     width: 350px;
     background-color: black;
     border-radius: 7px;
-    gap: 5px;
+    gap: 10px;
+}
+
+.team-list .item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.team-list img {
+    height: 40px;
+}
+
+.team-list h5 {
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
 }
 
 .team-list label {
+    line-height: 1;
     color: white;
     display: flex;
     align-items: baseline;
@@ -39,7 +59,7 @@
 
 .team-list span {
     color: #ccc;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .field-activities {
@@ -83,11 +103,13 @@
 .score .player-name {
     max-width: 13vw;
     overflow: hidden;
-    color: rgb(127, 127, 255);
+    font-weight: 600;
+    color: rgb(0, 162, 255);
 }
 
 .score .enemy-name {
-    color: rgb(255, 97, 97);
+    font-weight: 400;
+    color: rgb(255, 61, 61);
 }
 
 .timer {
@@ -103,13 +125,14 @@
 }
 
 .match-activities {
+    box-sizing: border-box;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    height: 600px;
+    height: 650px;
     color: white;
     background-color: black;
     padding: 15px;
@@ -125,34 +148,128 @@
     align-items: center;
     gap: 5px;
     width: 100%;
-    font-size: 18px;
+    font-size: 16px;
 }
 
-.player-event, .enemy-event {
-    width: 100%;
-    padding: 5px;
-    border-radius: 5px;
-    border-color: white;
-    border-style: solid;
-}
-
-.player-event {
-    color: rgb(127, 127, 255);
-    border-color: rgb(127, 127, 255);
-    border-width: 1px 1px 3px 3px;
-    text-align: left;
-    justify-content: left;
-}
-
+.player-event,
 .enemy-event {
-    color: rgb(255, 97, 97);
-    border-color: rgb(255, 97, 97);
-    border-width: 1px 3px 3px 1px;
-    text-align: right;
-    justify-content: right;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border-color: #777;
+    border-style: solid;
+    border-width: 1px 1px 1px 1px;
+}
+
+.player-event b, .enemy-event b{
+    font-weight: 500;
+}
+
+.ending {
+    font-weight: 800;
+    padding: 15px 10px;
+    border-width: 1px 1px 1px 8px;
+    border-color: rgb(135, 255, 99);
+    background: repeating-linear-gradient(135deg,
+            #012700,
+            #012700 10px,
+            #001b07 10px,
+            #001b07 20px);
 }
 
 .goal {
+    padding: 10px;
+    font-weight: 600;
+    border-width: 1px 1px 1px 8px;
+    border-color: white;
+    background: repeating-linear-gradient(135deg,
+            #1f1f1f,
+            #1f1f1f 10px,
+            #161616 10px,
+            #161616 20px);
+}
+
+.yellow-card {
+    border-width: 1px 1px 1px 8px;
+    border-color: rgb(252, 255, 99);
+    background: repeating-linear-gradient(135deg,
+            #272600,
+            #272600 10px,
+            #1b1b00 10px,
+            #1b1b00 20px);
+}
+
+.red-card {
+    border-width: 1px 1px 1px 8px;
+    border-color: rgb(255, 61, 61);
+    background: repeating-linear-gradient(135deg,
+            #2e0004,
+            #2e0004 10px,
+            #1b0002 10px,
+            #1b0002 20px);
+}
+
+.yellow-card span {
+    width: 12px;
+    height: 17px;
+    background: yellow;
+    border-radius: 2px;
+}
+
+.red-card span {
+    width: 12px;
+    height: 17px;
+    background: red;
+    border-radius: 2px;
+}
+
+.user-player {
+    color: rgb(0, 162, 255);
+}
+
+.enemy-player {
+    color: rgb(255, 61, 61);
+}
+
+.button-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.speed-button {
+    color: rgb(224, 188, 27);
+    background-color: black;
+    border: none;
+    font-family: inherit;
+    padding: 2px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+        background-color: rgb(3, 3, 3);
+    }
+}
+
+.selected-speed-button {
+    background-color: rgb(224, 188, 27);
+    color: black;
+    border: none;
+    font-family: inherit;
+    padding: 2px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+        background-color: rgb(196, 162, 11);
+    }
+
 }
 
 .start-game-button {
@@ -160,14 +277,14 @@
     color: black;
     border: none;
     font-family: inherit;
-    padding: 10px 25px;
-    border-radius: 10px;
+    padding: 5px 20px;
+    border-radius: 7px;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s ease-in-out;
 
-    &:hover{
+    &:hover {
         background-color: rgb(196, 162, 11);
     }
 }

@@ -2,23 +2,31 @@ import React, { useEffect, useRef, useState } from 'react'
 import './styles.css'
 import field from '../../assets/field.png'
 import { IoFootball } from "react-icons/io5"
-import { useLocation } from "react-router-dom";
+import { GiWhistle } from "react-icons/gi";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Position } from '../../helpers/Enums';
+import { simulateCards, simulateGoals } from './utils';
 
 const Match = () => {
 
     const { state } = useLocation();
 
+    const navigate = useNavigate()
+
     const [userTeam, setUserTeam] = useState(state.userTeam)
 
     const [enemyTeams, setEnemyTeams] = useState(state.aiTeams)
 
-    const [currEnemyTeam, setCurrEnemyTeam] = useState(state.aiTeams?.[0] ? state.aiTeams[0].players : [])
+    const [currEnemyTeam, setCurrEnemyTeam] = useState(state.aiTeams?.[0] ? state.aiTeams[0] : [])
+    const [currEnemyTeamIndex, setCurrEnemyTeamIndex] = useState(0)
 
     const [score, setScore] = useState({ player: 0, enemy: 0 })
+    const [simulationSpeed, setSimulationSpeed] = useState(200)
     const [activities, setActivities] = useState([])
     const [time, setTime] = useState(0)
     const [currentlySimulating, setCurrentlySimulating] = useState(false)
+
+    const activitiesRef = useRef(null)
 
     const simulateMatch = () => {
 
@@ -26,235 +34,211 @@ const Match = () => {
 
         setScore({ player: 0, enemy: 0 })
 
-        //#region possible events
-        const attemptGoal = (attackerPower, defenderPower) => {
-            const powerDifferencePercentage = (((attackerPower - defenderPower) / (attackerPower + defenderPower)))
-
-            const random = Math.random()
-            if (random <= (powerDifferencePercentage)) {
-                return true
-            } else {
-                return false
-            }
-        }
-
-
-
-        const isGoalPenalty = () => {
-            return Math.random() < 0.1
-        }
-
-        //#endregion
-
-        //#region team powers
-        const powers = ["attack", "midfield", "defense"]
-
-        const playerPower = {
-            defense: userTeam
-                .filter(player =>
-                    [
-                        Position.GK,
-                        Position.LB,
-                        Position.RB,
-                        Position.LCB,
-                        Position.RCB
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-            midfield: userTeam
-                .filter(player =>
-                    [
-                        Position.CDM,
-                        Position.CM,
-                        Position.CAM,
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-            attack: userTeam
-                .filter(player =>
-                    [
-                        Position.LW,
-                        Position.ST,
-                        Position.RW,
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-        }
-
-        const enemyPower = {
-            defense: currEnemyTeam
-                .filter(player =>
-                    [
-                        Position.GK,
-                        Position.LB,
-                        Position.RB,
-                        Position.LCB,
-                        Position.RCB
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-            midfield: currEnemyTeam
-                .filter(player =>
-                    [
-                        Position.CDM,
-                        Position.CM,
-                        Position.CAM,
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-            attack: currEnemyTeam
-                .filter(player =>
-                    [
-                        Position.LW,
-                        Position.ST,
-                        Position.RW,
-                    ].includes(player.position)
-                )
-                .reduce((total, player) => total + player.overall, 0),
-        }
-
-        //#endregion
-
-        const possibleGoalsMinutes = Array.from(
-            new Set(
-                Array.from({ length: 20 }, () => Math.floor(Math.random() * 90) + 1)
-            )
-        ).sort((a, b) => a - b);
-
-        const possibleYellowCardsMinutes = Array.from(
-            new Set(
-                Array.from({ length: 20 }, () => Math.floor(Math.random() * 90) + 1)
-            )
-        ).sort((a, b) => a - b);
-
-
         //#region simulate events
         setActivities([])
-        const auxActivities = []
+        const goals = simulateGoals(userTeam, currEnemyTeam.players)
+        const cards = simulateCards(userTeam, currEnemyTeam.players)
+        const allEvents = [...goals, ...cards]
+        const playerGoals = allEvents.filter((event) => event.type === 'goal' && event.actor === 'player').length
+        const enemyGoals = allEvents.filter((event) => event.type === 'goal' && event.actor === 'enemy').length
+        const winner = playerGoals > enemyGoals ? 'player' : playerGoals == enemyGoals ? 'draw' : 'enemy'
 
-        // Closer to zero means harder
-        const difficultyMultipler = 0.8
-
-        for (let minute of possibleGoalsMinutes) {
-
-            // Get a random power value from the teams and apply the difficulty multiplier on it
-            // Since the player will most likely always have a stronger team than the AI, I multiply the user's power by a random number between the difficulty base and 1 
-            // Let's say the difficulty is set to 0.8 => the power will be multiplied by a random number between 0.8 and 1
-            // The AI will then have its power multiplied by a random number between 1 and 1.2
-            const playerPowerValue = playerPower[powers[Math.floor(Math.random() * powers.length)]] * (Math.random() * (1 - difficultyMultipler) + difficultyMultipler)
-            const enemyPowerValue = enemyPower[powers[Math.floor(Math.random() * powers.length)]] * (Math.random() * (1 + (difficultyMultipler - 1) - 1) + 1)
-
-            if (playerPowerValue > enemyPowerValue) {
-                const goal = attemptGoal(playerPowerValue, enemyPowerValue)
-                if (goal) {
-                    const wasItPenalty = isGoalPenalty()
-
-                    const playersWithoutGK = userTeam.filter(player => player.position !== Position.GK)
-
-                    const randomPlayer = playersWithoutGK[Math.floor(Math.random() * playersWithoutGK.length)]
-
-                    const actObj = {
-                        actor: 'player',
-                        minute: minute,
-                        description: `${randomPlayer.name} ${wasItPenalty ? ' (P)' : ''}`,
-                    }
-
-                    auxActivities.push(actObj)
-                }
-            } else {
-                const goal = attemptGoal(enemyPowerValue, playerPowerValue)
-                if (goal) {
-                    const wasItPenalty = isGoalPenalty()
-
-                    const playersWithoutGK = currEnemyTeam?.filter(player => player.position !== Position.GK)
-
-                    const randomPlayer = playersWithoutGK[Math.floor(Math.random() * playersWithoutGK.length)]
-
-                    const actObj = {
-                        type: 'goal',
-                        actor: 'enemy',
-                        minute: minute,
-                        description: `${randomPlayer.name} ${wasItPenalty ? ' (P)' : ''}`,
-                    }
-
-                    auxActivities.push(actObj)
-                }
-            }
+        const finishEvent = {
+            type: 'ending',
+            actor: 'player',
+            minute: 90,
+            description: winner === 'player' ?
+                <label>The match is over! <b className={'user-player'}>Player</b> Wins!</label>
+                : winner === 'enemy' ?
+                    <label>The match is over! <b className={'enemy-player'}>{currEnemyTeam.name}</b> Wins!</label>
+                    :
+                    <label>The match is over! It's a Draw!</label>,
         }
+
+        const auxActivities = [...allEvents, finishEvent]
 
         // Show the events
         for (let i = 0; i <= 90; i++) {
             setTimeout(() => {
                 setTime(i)
-                const eventAtThisMinute = auxActivities.filter((act) => act.minute == i)
-                if (eventAtThisMinute?.[0]?.actor == 'player') {
-                    setScore((prev) => ({ ...prev, player: prev.player + 1 }))
-                } else if (eventAtThisMinute?.[0]?.actor == 'enemy') {
-                    setScore((prev) => ({ ...prev, enemy: prev.enemy + 1 }))
-                }
-                setActivities((curr) => [...curr, ...eventAtThisMinute])
 
-                if (i == 90) {
+                const eventAtThisMinute = auxActivities?.filter((act) => act.minute === i) || []
+
+                for (let event of eventAtThisMinute) {
+
+                    // refresh score
+                    if (event.actor === 'player' && event.type === 'goal') {
+                        setScore((prev) => ({ ...prev, player: prev.player + 1 }))
+                    } else if (event.actor === 'enemy' && event.type === 'goal') {
+                        setScore((prev) => ({ ...prev, enemy: prev.enemy + 1 }))
+                    }
+
+                    setActivities((curr) => [...curr, event])
+                }
+
+                if (i === 90) {
                     setCurrentlySimulating(false)
                 }
-            }, i * 100)
+            }, i * simulationSpeed);
         }
     }
+
+    useEffect(() => {
+        if (activitiesRef.current) {
+            activitiesRef.current.scrollTo({
+                top: activitiesRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [activities])
+
+    useEffect(() => {
+        currEnemyTeamIndex > 0 && simulateMatch()
+    }, [currEnemyTeam])
 
     return (
         <div className='match-container'>
             <div className='team-list'>
+                <h2>OVERALL: {
+                    userTeam && userTeam.length > 0
+                        ? Math.round(userTeam.reduce((acc, player) => acc + (player.overall || 0), 0) / userTeam.length)
+                        : 0
+                }</h2>
                 {userTeam?.map((player) => {
                     return (
-                        <label key={player.position}>
-                            <b>{player.position}</b>
-                            {player.name}
-                            <span>({player.overall})</span>
-                        </label>
+                        <div key={player.position} className='item'>
+                            <img src={player.image}></img>
+                            <div>
+                                <h5>{player.name}</h5>
+                                <label>
+                                    <b>{player.position}</b>
+                                    <span>OVR: {player.overall}</span>
+                                </label>
+                            </div>
+                        </div>
                     )
                 })}
             </div>
             <div className='field-activities'>
                 <div className='match-header'>
                     <label className='score'>
-                        <span className='player-name'>Bodde</span>
+                        <span className='player-name'>Player</span>
                         <span className='live-score'>{score.player} - {score.enemy}</span>
-                        <span className='enemy-name'>AI Trainer</span>
+                        <span className='enemy-name'>Trainer {currEnemyTeam.name}</span>
                     </label>
                     <span className='timer'>{time}'</span>
                 </div>
-                <div className='match-activities'>
+                <div className='match-activities' ref={activitiesRef}>
                     {activities?.map((event) => {
+                        const eventIcon = () => {
+                            switch (event.type) {
+                                case 'goal':
+                                    return <IoFootball />
+                                case 'yellow-card':
+                                    return <span className='yellow-card'></span>
+                                case 'red-card':
+                                    return <span className='red-card'></span>
+                                case 'ending':
+                                    return <GiWhistle />
+                                default:
+                                    return <></>
+                            }
+                        }
+
                         return (
                             <>
                                 <label className={`${event.actor}-event ${event.type}`}>
-                                    <IoFootball />
+                                    {eventIcon()}
                                     {event.minute}' {event.description}
                                 </label>
                             </>
                         )
                     })}
                 </div>
-                <button
-                    className='start-game-button'
-                    onClick={() => simulateMatch()}
-                    disabled={currentlySimulating}
-                >
-                    Start Game
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+                    <div className='button-line'>
+                        <button
+                            className={`${simulationSpeed == 200 ? 'selected-' : ''}speed-button`}
+                            onClick={() => setSimulationSpeed(200)}
+                            disabled={currentlySimulating}
+                        >
+                            1x
+                        </button>
+                        <button
+                            className={`${simulationSpeed == 100 ? 'selected-' : ''}speed-button`}
+                            onClick={() => setSimulationSpeed(100)}
+                            disabled={currentlySimulating}
+                        >
+                            2x
+                        </button>
+                        <button
+                            className={`${simulationSpeed == 50 ? 'selected-' : ''}speed-button`}
+                            onClick={() => setSimulationSpeed(50)}
+                            disabled={currentlySimulating}
+                        >
+                            4x
+                        </button>
+                    </div>
+                    {
+                        !currentlySimulating &&
+                        !(score.player > score.enemy) &&
+                        <button
+                            className='start-game-button'
+                            onClick={() => simulateMatch()}
+                        >
+                            Play Match
+                        </button>
+                    }
+                    {
+                        enemyTeams[currEnemyTeamIndex + 1] &&
+                        !currentlySimulating &&
+                        score.player > score.enemy &&
+                        <button
+                            className='start-game-button'
+                            onClick={() => {
+                                setCurrEnemyTeam(enemyTeams[currEnemyTeamIndex + 1])
+                                setCurrEnemyTeamIndex((prev) => prev + 1)
+                            }}
+                        >
+                            Next Rival
+                        </button>
+                    }
+                    {
+                        !enemyTeams[currEnemyTeamIndex + 1] &&
+                        <button
+                            className='start-game-button'
+                            onClick={() => {
+                                navigate("/")
+                            }}
+                        >
+                            Finish Tournament
+                        </button>
+                    }
+
+                </div>
             </div>
             <div className='team-list'>
-                {currEnemyTeam?.map((player) => {
+                <h2>OVERALL: {
+                    currEnemyTeam?.players && currEnemyTeam.players.length > 0
+                        ? Math.round(currEnemyTeam.players.reduce((acc, player) => acc + (player.overall || 0), 0) / currEnemyTeam.players.length)
+                        : 0
+                }</h2>
+                {currEnemyTeam?.players?.map((player) => {
                     return (
-                        <label key={player.position}>
-                            <b>{player.position}</b>
-                            {player.name}
-                            <span>({player.overall})</span>
-                        </label>
+                        <div key={player.position} className='item'>
+                            <img src={player.image}></img>
+                            <div>
+                                <h5>{player.name}</h5>
+                                <label>
+                                    <b>{player.position}</b>
+                                    <span>OVR: {player.overall}</span>
+                                </label>
+                            </div>
+                        </div>
                     )
                 })}
             </div>
-        </div>
+        </div >
     )
 }
 
