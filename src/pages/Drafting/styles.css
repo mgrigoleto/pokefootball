@@ -158,6 +158,19 @@
   animation: rotation 1s linear infinite;
 }
 
+.spinner-card-black {
+  --color-1: #000;
+  --size: 1.3px;
+  width: calc(48 * var(--size));
+  height: calc(48 * var(--size));
+  border: calc(5 * var(--size)) solid var(--color-1);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
 @keyframes rotation {
   0% {
     transform: rotate(0deg);
@@ -293,6 +306,9 @@
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         background-color: rgb(196, 162, 11);

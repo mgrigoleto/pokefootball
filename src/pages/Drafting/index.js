@@ -64,6 +64,7 @@ const Drafting = () => {
     const [error, setError] = useState(null)
     const [userTeam, setUserTeam] = useState(initialTeamArray)
     const [refreshUsed, setRefreshUsed] = useState(0)
+    const [loadingAiTeams, setLoadingAiTeams] = useState(false)
 
     const fetchPokemons = useCallback(async (amount = 16) => {
         const TOTAL_POKEMONS = 493
@@ -149,10 +150,10 @@ const Drafting = () => {
     }, []);
 
     const generateAITeams = async () => {
-        const enemyPokemons = await fetchPokemons(11)
         const aiNames = ["Red", "Blue", "Cynthia", "Lance", "Brock", "Misty", "Steven"]
         let enemies = []
         for (let i = 0; i < 7; i++) {
+            const enemyPokemons = await fetchPokemons(11)
             enemies.push({
                 name: aiNames[i],
                 players:
@@ -499,11 +500,11 @@ const Drafting = () => {
                                 setRefreshUsed(prev => prev + 1)
                                 getRandomPokemons()
                             }}
-                        disabled={refreshUsed === 3}
+                            disabled={refreshUsed === 2}
                         >
                             <LuRefreshCw />
                         </button>
-                        <h2>{refreshUsed}/3</h2>
+                        <h2>{refreshUsed}/2</h2>
                     </div>
                     <div className='pokemon-wrapper'>
                         {
@@ -584,6 +585,7 @@ const Drafting = () => {
             <button
                 className='ready-button'
                 onClick={async () => {
+                    setLoadingAiTeams(true)
                     const aiTeams = await generateAITeams()
 
                     navigate("/match", {
@@ -595,7 +597,7 @@ const Drafting = () => {
                 }}
                 disabled={!userTeam.every((pkm) => pkm.name != undefined)}
             >
-                I'M READY!
+                {loadingAiTeams ? <span className="spinner-card-black"></span> : "I'M READY!"}
             </button>
         </div>
     )
