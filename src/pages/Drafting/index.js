@@ -4,6 +4,7 @@ import flag from '../../assets/japan-flag.png'
 import { FiPlusCircle } from "react-icons/fi";
 import { LuRefreshCw } from "react-icons/lu";
 import { FaTrash } from "react-icons/fa";
+import { FaXmark } from "react-icons/fa6";
 import { BsStars } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { Position } from '../../helpers/Enums';
@@ -14,50 +15,17 @@ const Drafting = () => {
     const navigate = useNavigate()
 
     const initialTeamArray = [
-        {
-            index: 1,
-            position: Position.GK,
-        },
-        {
-            index: 2,
-            position: Position.LB,
-        },
-        {
-            index: 3,
-            position: Position.LCB,
-        },
-        {
-            index: 4,
-            position: Position.RCB,
-        },
-        {
-            index: 5,
-            position: Position.RB,
-        },
-        {
-            index: 6,
-            position: Position.CDM,
-        },
-        {
-            index: 7,
-            position: Position.CM,
-        },
-        {
-            index: 8,
-            position: Position.CAM,
-        },
-        {
-            index: 9,
-            position: Position.LW,
-        },
-        {
-            index: 10,
-            position: Position.ST,
-        },
-        {
-            index: 11,
-            position: Position.RW,
-        }
+        { index: 1, position: Position.GK, },
+        { index: 2, position: Position.LB, },
+        { index: 3, position: Position.LCB, },
+        { index: 4, position: Position.RCB, },
+        { index: 5, position: Position.RB, },
+        { index: 6, position: Position.LM, },
+        { index: 7, position: Position.CM, },
+        { index: 8, position: Position.RM, },
+        { index: 9, position: Position.LW, },
+        { index: 10, position: Position.ST, },
+        { index: 11, position: Position.RW, }
     ]
 
     const [pokemons, setPokemons] = useState([])
@@ -68,7 +36,7 @@ const Drafting = () => {
     const [refreshUsed, setRefreshUsed] = useState(0)
     const [loadingAiTeams, setLoadingAiTeams] = useState(false)
 
-    const fetchPokemons = useCallback(async (amount = 16) => {
+    const fetchPokemons = useCallback(async (amount = 24) => {
         const TOTAL_POKEMONS = 1025
         let foundPokemons = []
 
@@ -135,7 +103,7 @@ const Drafting = () => {
         return foundPokemons
     }, []);
 
-    const getRandomPokemons = useCallback(async (amount = 16) => {
+    const getRandomPokemons = useCallback(async (amount = 24) => {
         setPokemons([])
         const TOTAL_POKEMONS = 1025
         setError(null)
@@ -254,6 +222,155 @@ const Drafting = () => {
         return overall > 94 ? 'legend' : overall > 74 ? 'gold' : overall > 64 ? 'silver' : 'bronze';
     };
 
+    const renderPokemonCard = (pokemon) => {
+
+        const ranking = getRankingClass(pokemon.overall);
+
+        return (
+            <div
+                key={pokemon.index}
+                className={`fifa-card-container`}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, pokemon.index)}
+                draggable={!!pokemon.name}
+                onDragStart={(e) => handleDragFromTeam(e, pokemon.index)}
+            >
+                {
+                    pokemon.name ?
+                        <div className={`fifa-card-content ${ranking}`}>
+                            <div className="card-top">
+                                <div className="card-badge">
+                                    <span className="rating">{pokemon.overall}</span>
+                                    <span className="position">{pokemon.position}</span>
+                                </div>
+                                <button
+                                    className='remove-pokemon-button'
+                                    onClick={() => setUserTeam((prev) =>
+                                        prev.map((pkm) =>
+                                            pkm.name === pokemon.name
+                                                ? { index: pokemon.index, position: pokemon.position }
+                                                : pkm
+                                        )
+                                    )}
+                                >
+                                    <FaXmark />
+                                </button>
+                            </div>
+                            <div className='img-skeleton'>
+                            </div>
+                            <div className="player-image-container">
+                                <img className="player-image" src={pokemon.image} alt={pokemon.name} />
+                                {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
+                            </div>
+
+                            <label className="name">{pokemon.name}</label>
+
+                            <div className="stats-grid">
+                                <div className="stat-col">
+                                    <div>
+                                        <span
+                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
+                                        ><b>HP</b> </span>
+                                        <span
+                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
+                                        >{pokemon.hp}</span>
+                                    </div>
+                                    <div>
+                                        <span
+                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
+                                        ><b>ATK</b> </span>
+                                        <span
+                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
+                                        >{pokemon.attack}</span>
+                                    </div>
+                                    <div>
+                                        <span
+                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
+                                        ><b>DEF</b> </span>
+                                        <span
+                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
+                                        >{pokemon.defense}</span>
+                                    </div>
+                                </div>
+                                <hr></hr>
+                                <div className="stat-col">
+                                    <div>
+                                        <span
+                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
+                                        ><b>SPA</b> </span>
+                                        <span
+                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
+                                        >{pokemon.special_attack}</span>
+                                    </div>
+                                    <div>
+                                        <span
+                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
+                                        ><b>SPD</b> </span>
+                                        <span
+                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
+                                        >{pokemon.special_defense}</span>
+                                    </div>
+                                    <div>
+                                        <span
+                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
+                                        ><b>SPE</b> </span>
+                                        <span
+                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
+                                        >{pokemon.speed}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        :
+                        <div className="fifa-chosen-card-content">
+                            <div className="card-top">
+                                <div className="card-badge">
+                                    <span className="rating">??</span>
+                                    <span className="position">{pokemon.position}</span>
+                                </div>
+                            </div>
+                            <div className='img-skeleton'>
+                            </div>
+                            <label className='add-pokemon-icon'><FiPlusCircle /></label>
+                            <label className="name">POKÉMON NAME</label>
+
+                            <div className="stats-grid">
+                                <div className="stat-col">
+                                    <div>
+                                        <span><b>HP</b></span>
+                                        <span>??</span>
+                                    </div>
+                                    <div>
+                                        <span><b>ATK</b> </span>
+                                        <span>??</span>
+                                    </div>
+                                    <div>
+                                        <span><b>DEF</b> </span>
+                                        <span>??</span>
+                                    </div>
+                                </div>
+                                <hr></hr>
+                                <div className="stat-col">
+                                    <div>
+                                        <span><b>SPA</b> </span>
+                                        <span>??</span>
+                                    </div>
+                                    <div>
+                                        <span><b>SPD</b> </span>
+                                        <span>??</span>
+                                    </div>
+                                    <div>
+                                        <span><b>SPE</b> </span>
+                                        <span>??</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                }
+            </div>
+        )
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className='drafting-container'>
@@ -268,131 +385,30 @@ const Drafting = () => {
                         </button>
                     </div>
                     <div className='team-wrapper'>
-                        {userTeam?.map((pokemon) => {
-                            const ranking = getRankingClass(pokemon.overall);
-
-                            return (
-                                <div
-                                    key={pokemon.index}
-                                    className={`fifa-card-container`}
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, pokemon.index)}
-                                    draggable={!!pokemon.name}
-                                    onDragStart={(e) => handleDragFromTeam(e, pokemon.index)}
-                                >
-                                    {
-                                        pokemon.name ?
-                                            <div className={`fifa-card-content ${ranking}`}>
-                                                <div className="card-top">
-                                                    <div className="card-badge">
-                                                        <span className="rating">{pokemon.overall}</span>
-                                                        <span className="position">{pokemon.position}</span>
-                                                    </div>
-                                                    <button
-                                                        className='remove-pokemon-button'
-                                                        onClick={() => setUserTeam((prev) =>
-                                                            prev.map((pkm) =>
-                                                                pkm.name === pokemon.name
-                                                                    ? { index: pokemon.index, position: pokemon.position }
-                                                                    : pkm
-                                                            )
-                                                        )}
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
-                                                </div>
-                                                <div className='img-skeleton'>
-                                                </div>
-                                                <div className="player-image-container">
-                                                    <img className="player-image" src={pokemon.image} alt={pokemon.name} />
-                                                    {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
-                                                </div>
-
-                                                <label className="name">{pokemon.name}</label>
-
-                                                <div className="stats-grid">
-                                                    <div className="stat-col">
-                                                        <span
-                                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
-                                                        ><b>HP</b> </span>
-                                                        <span
-                                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
-                                                        ><b>ATK</b> </span>
-                                                        <span
-                                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
-                                                        ><b>DEF</b> </span>
-                                                        <span
-                                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
-                                                        ><b>SPA</b> </span>
-                                                        <span
-                                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
-                                                        ><b>SPD</b> </span>
-                                                        <span
-                                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
-                                                        ><b>SPE</b> </span>
-                                                    </div>
-                                                    <div className="stat-col">
-                                                        <span
-                                                            className={pokemon.original_hp > pokemon.hp ? 'nerfed' : pokemon.original_hp < pokemon.hp ? 'buffed' : ''}
-                                                        >{pokemon.hp}</span>
-                                                        <span
-                                                            className={pokemon.original_attack > pokemon.attack ? 'nerfed' : pokemon.original_attack < pokemon.attack ? 'buffed' : ''}
-                                                        >{pokemon.attack}</span>
-                                                        <span
-                                                            className={pokemon.original_defense > pokemon.defense ? 'nerfed' : pokemon.original_defense < pokemon.defense ? 'buffed' : ''}
-                                                        >{pokemon.defense}</span>
-                                                        <span
-                                                            className={pokemon.original_special_attack > pokemon.special_attack ? 'nerfed' : pokemon.original_special_attack < pokemon.special_attack ? 'buffed' : ''}
-                                                        >{pokemon.special_attack}</span>
-                                                        <span
-                                                            className={pokemon.original_special_defense > pokemon.special_defense ? 'nerfed' : pokemon.original_special_defense < pokemon.special_defense ? 'buffed' : ''}
-                                                        >{pokemon.special_defense}</span>
-                                                        <span
-                                                            className={pokemon.original_speed > pokemon.speed ? 'nerfed' : pokemon.original_speed < pokemon.speed ? 'buffed' : ''}
-                                                        >{pokemon.speed}</span>
-                                                    </div>
-                                                </div>
-                                                <img className='flag-card' src={flag}></img>
-                                            </div>
-                                            :
-                                            <div className="fifa-chosen-card-content">
-                                                <div className="card-top">
-                                                    <div className="card-badge">
-                                                        <span className="rating">??</span>
-                                                        <span className="position">{pokemon.position}</span>
-                                                    </div>
-                                                </div>
-                                                <div className='img-skeleton'>
-                                                </div>
-                                                <label className='add-pokemon-icon'><FiPlusCircle /></label>
-                                                <label className="name">POKÉMON NAME</label>
-
-                                                <div className="stats-grid">
-                                                    <div className="stat-col">
-                                                        <span><b>HP</b></span>
-                                                        <span><b>ATK</b> </span>
-                                                        <span><b>DEF</b> </span>
-                                                        <span><b>SPA</b> </span>
-                                                        <span><b>SPD</b> </span>
-                                                        <span><b>SPE</b> </span>
-                                                    </div>
-                                                    <div className="stat-col">
-                                                        <span>??</span>
-                                                        <span>??</span>
-                                                        <span>??</span>
-                                                        <span>??</span>
-                                                        <span>??</span>
-                                                        <span>??</span>
-                                                    </div>
-                                                </div>
-                                                <img className='flag-card' src={flag}></img>
-
-                                            </div>
-                                    }
-                                </div>
-                            )
-                        })
-                        }
+                        <div className='team-wrapper-line'>
+                            {userTeam && userTeam.slice(8, 11).map((pokemon) => {
+                                return renderPokemonCard(pokemon)
+                            })
+                            }
+                        </div>
+                        <div className='team-wrapper-line'>
+                            {userTeam && userTeam.slice(5, 8).map((pokemon) => {
+                                return renderPokemonCard(pokemon)
+                            })
+                            }
+                        </div>
+                        <div className='team-wrapper-line'>
+                            {userTeam && userTeam.slice(1, 5).map((pokemon) => {
+                                return renderPokemonCard(pokemon)
+                            })
+                            }
+                        </div>
+                        <div className='team-wrapper-line'>
+                            {userTeam && [userTeam[0]].map((pokemon) => {
+                                return renderPokemonCard(pokemon)
+                            })
+                            }
+                        </div>
                     </div>
 
                 </div>
@@ -405,16 +421,16 @@ const Drafting = () => {
                                 setRefreshUsed(prev => prev + 1)
                                 getRandomPokemons()
                             }}
-                            disabled={refreshUsed === 2}
+                            disabled={refreshUsed === 1}
                         >
                             <LuRefreshCw />
                         </button>
-                        <h2>{refreshUsed}/2</h2>
+                        <h2>{refreshUsed}/1</h2>
                     </div>
                     <div className='pokemon-wrapper'>
                         {
                             loading &&
-                            Array.from({ length: 16 }, (_, index) => ({
+                            Array.from({ length: 24 }, (_, index) => ({
                                 id: index + 1,
                             })).map((item) => {
                                 return (
@@ -462,23 +478,35 @@ const Drafting = () => {
 
                                         <div className="stats-grid">
                                             <div className="stat-col">
-                                                <span><b>HP</b></span>
-                                                <span><b>ATK</b> </span>
-                                                <span><b>DEF</b> </span>
-                                                <span><b>SPA</b> </span>
-                                                <span><b>SPD</b> </span>
-                                                <span><b>SPE</b> </span>
+                                                <div>
+                                                    <span><b>HP</b></span>
+                                                    <span>{pokemon.hp}</span>
+                                                </div>
+                                                <div>
+                                                    <span><b>ATK</b> </span>
+                                                    <span>{pokemon.attack}</span>
+                                                </div>
+                                                <div>
+                                                    <span><b>DEF</b> </span>
+                                                    <span>{pokemon.defense}</span>
+                                                </div>
                                             </div>
+                                            <hr></hr>
                                             <div className="stat-col">
-                                                <span>{pokemon.hp}</span>
-                                                <span>{pokemon.attack}</span>
-                                                <span>{pokemon.defense}</span>
-                                                <span>{pokemon.special_attack}</span>
-                                                <span>{pokemon.special_defense}</span>
-                                                <span>{pokemon.speed}</span>
+                                                <div>
+                                                    <span><b>SPA</b> </span>
+                                                    <span>{pokemon.special_attack}</span>
+                                                </div>
+                                                <div>
+                                                    <span><b>SPD</b> </span>
+                                                    <span>{pokemon.special_defense}</span>
+                                                </div>
+                                                <div>
+                                                    <span><b>SPE</b> </span>
+                                                    <span>{pokemon.speed}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <img className='flag-card' src={flag}></img>
                                     </div>
                                 </div>
                             )
@@ -486,7 +514,6 @@ const Drafting = () => {
                     </div>
                 </div>
             </div >
-
 
             <button
                 className='ready-button'

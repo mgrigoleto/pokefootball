@@ -2,7 +2,7 @@ import { Position } from "../../helpers/Enums"
 import { randomAttackDescription, randomFoulDescription, randomGoalDescription } from "./eventDescriptions"
 
 // Closer to zero means harder
-const difficultyMultipler = 0.8
+const difficultyMultipler = 0.9
 
 //#region possible events
 const attemptGoal = (attackerPower, defenderPower) => {
@@ -47,9 +47,9 @@ const getTeamPowers = (userTeam, enemyTeam) => {
         midfield: userTeam
             .filter(player =>
                 [
-                    Position.CDM,
+                    Position.LM,
                     Position.CM,
-                    Position.CAM,
+                    Position.RM,
                 ].includes(player.position)
             )
             .reduce((total, player) => total + player.overall, 0),
@@ -79,9 +79,9 @@ const getTeamPowers = (userTeam, enemyTeam) => {
         midfield: enemyTeam
             .filter(player =>
                 [
-                    Position.CDM,
+                    Position.LM,
                     Position.CM,
-                    Position.CAM,
+                    Position.RM,
                 ].includes(player.position)
             )
             .reduce((total, player) => total + player.overall, 0),
@@ -120,8 +120,8 @@ export const simulateGoals = (userTeam, enemyTeam) => {
         // Since the player will most likely always have a stronger team than the AI, I multiply the user's power by a random number between the difficulty base and 1 
         // Let's say the difficulty is set to 0.8 => the power will be multiplied by a random number between 0.8 and 1
         // The AI will then have its power multiplied by a random number between 1 and 1.2
-        const playerPowerValue = playerPower[powers[Math.floor(Math.random() * powers.length)]] * (Math.random() * (1 - difficultyMultipler) + difficultyMultipler)
-        const enemyPowerValue = enemyPower[powers[Math.floor(Math.random() * powers.length)]] * (Math.random() * (1 + (difficultyMultipler - 1) - 1) + 1)
+        const playerPowerValue = playerPower[powers[Math.floor(Math.random() * powers.length)]] * difficultyMultipler
+        const enemyPowerValue = enemyPower[powers[Math.floor(Math.random() * powers.length)]] * (2-difficultyMultipler)
 
         if (playerPowerValue > enemyPowerValue) {
             const goal = attemptGoal(playerPowerValue, enemyPowerValue)
@@ -243,6 +243,7 @@ export const simulateCards = (userTeam, enemyTeam) => {
                 }
 
                 card.color == 'yellow' && yellowedUserPlayers.push(randomUserPlayer.name)
+                card.color == 'red' && yellowedUserPlayers.push(randomUserPlayer.name, randomUserPlayer.name)
             } else {
                 const hasMultipleYellows = yellowedEnemyPlayers.filter(name => name === randomEnemyPlayer.name).length > 1
 
@@ -270,6 +271,7 @@ export const simulateCards = (userTeam, enemyTeam) => {
                 }
 
                 card.color == 'yellow' && yellowedEnemyPlayers.push(randomEnemyPlayer.name)
+                card.color == 'red' && yellowedEnemyPlayers.push(randomEnemyPlayer.name, randomEnemyPlayer.name)
             }
         }
     }

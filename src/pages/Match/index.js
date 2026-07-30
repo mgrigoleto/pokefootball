@@ -79,7 +79,7 @@ const Match = () => {
             description: winner === 'player' ?
                 <label>The match is over! <b className={'user-player'}>Player</b> Wins!</label>
                 : winner === 'enemy' ?
-                    <label>The match is over! <b className={'enemy-player'}>{currEnemyTeam.name}</b> Wins!</label>
+                    <label>The match is over! <b className={'enemy-player'}>Trainer {currEnemyTeam.name}</b> Wins!</label>
                     :
                     <label>The match is over! It's a Draw!</label>,
         }
@@ -237,7 +237,8 @@ const Match = () => {
                         <button
                             className='start-game-button'
                             onClick={() => {
-                                navigate("/")
+                                simulateMatch()
+                                // navigate("/")
                             }}
                         >
                             Finish Tournament

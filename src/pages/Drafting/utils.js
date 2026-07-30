@@ -71,9 +71,9 @@ export const recalculateStats = (pokemon) => {
             overall
         }
     } else if ([
-        Position.CDM,
+        Position.LM,
         Position.CM,
-        Position.CAM,
+        Position.RM,
     ].includes(pokemon.position)) {
         const hp = Math.round(pokemon.original_hp * 1.1)
         const attack = Math.round(pokemon.original_attack * 1.1)
