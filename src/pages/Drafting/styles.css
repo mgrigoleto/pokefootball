@@ -73,6 +73,8 @@
 }
 
 .fifa-card-container {
+    border-radius: 15px;
+    overflow: hidden;
     cursor: grab;
     position: relative;
     width: 170px;
@@ -95,8 +97,6 @@
 }
 
 .fifa-card-content {
-    border-radius: 15px;
-    overflow: hidden;
     position: absolute;
     left: 0;
     right: 0;
