@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import './styles.css'
 import flag from '../../assets/japan-flag.png'
-import { FiPlusCircle } from "react-icons/fi";
+import { MdCatchingPokemon } from "react-icons/md";
 import { LuRefreshCw } from "react-icons/lu";
 import { FaTrash } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
@@ -222,14 +222,31 @@ const Drafting = () => {
         return overall > 94 ? 'legend' : overall > 74 ? 'gold' : overall > 64 ? 'silver' : 'bronze';
     };
 
+    const customMarginPerPosition = {
+        GK: "-5px 0 0 0",
+        LB: "0 90px 15px 0",
+        LCB: "20px 45px 0 0",
+        RCB: "20px 0 0 45px",
+        RB: "0 0 15px 90px",
+        LM: "0 50px -20px 0",
+        CM: "0 0 -20px 0",
+        RM: "0 0 -20px 50px",
+        LW: "20px 150px 0 0",
+        ST: "0 0 20px 0",
+        RW: "20px 0 0 150px",
+    }
+
     const renderPokemonCard = (pokemon) => {
 
         const ranking = getRankingClass(pokemon.overall);
 
+        console.log('margin', customMarginPerPosition[pokemon.position])
+
         return (
             <div
                 key={pokemon.index}
-                className={`fifa-card-container`}
+                style={{ margin: customMarginPerPosition[pokemon.position] }}
+                className={`fifa-card-container ${!pokemon.name && `empty-card`}`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, pokemon.index)}
                 draggable={!!pokemon.name}
@@ -331,8 +348,8 @@ const Drafting = () => {
                             </div>
                             <div className='img-skeleton'>
                             </div>
-                            <label className='add-pokemon-icon'><FiPlusCircle /></label>
-                            <label className="name">POKÉMON NAME</label>
+                            <label className='add-pokemon-icon'><MdCatchingPokemon /></label>
+                            <label className="name"></label>
 
                             <div className="stats-grid">
                                 <div className="stat-col">
