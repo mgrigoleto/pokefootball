@@ -240,13 +240,25 @@
 }
 
 .name {
+    box-sizing: border-box;
+    text-overflow: ellipsis;
     font-size: 18px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: -0.5px;
     margin-top: 0px;
     text-align: center;
-    width: 100%;
+    overflow: hidden;
+    height: 30px;
+    max-width: 100%;
+}
+
+.shiny-badge {
+    position: absolute;
+    right: 0;
+    top: 30px;
+    font-size: 30px;
+    color: rgb(246, 255, 208);
 }
 
 .stats-grid {
@@ -267,11 +279,11 @@
 }
 
 .buffed {
-    color: rgb(13, 0, 87);
+    color: rgb(0, 22, 146);
 }
 
 .nerfed {
-    color: rgb(112, 0, 0);
+    color: rgb(146, 1, 1);
 }
 
 .stat-col span {
@@ -334,7 +346,6 @@
     &:hover {
         background-color: rgb(196, 162, 11);
     }
-
 }
 
 .remove-pokemon-button {
@@ -356,5 +367,4 @@
     &:hover {
     color: rgb(255, 72, 72);
     }
-
 }

@@ -29,6 +29,33 @@ const Match = () => {
     const activitiesRef = useRef(null)
 
     const simulateMatch = () => {
+        const seenRedCards = {}
+
+        const filterRepeteadRedCards = (cards) => {
+            const filteredCards = cards.filter((event) => {
+                if (event.type !== 'red-card') return true
+                
+                if (seenRedCards[event.agentPlayer]) {
+                    return false
+                }
+                seenRedCards[event.agentPlayer] = true
+                return true
+            })
+
+            return filteredCards
+        }
+
+        const filterOutRedCardPlayers = (cardEvents) => {
+            const userPlayersOutOfMatch = cardEvents.filter((event) => event.type === 'red-card' && event.actor === 'player')
+            const outUserPlayerNames = new Set(userPlayersOutOfMatch.map((event) => event.agentPlayer))
+            const enemyPlayersOutOfMatch = cardEvents.filter((event) => event.type === 'red-card' && event.actor === 'enemy')
+            const outEnemyUserPlayerNames = new Set(enemyPlayersOutOfMatch.map((event) => event.agentPlayer))
+
+            const filteredUserTeam = userTeam.filter((player) => !outUserPlayerNames.has(player.name))
+            const filteredCurrEnemyTeam = currEnemyTeam.players.filter((player) => !outEnemyUserPlayerNames.has(player.name))
+
+            return { filteredUserTeam, filteredCurrEnemyTeam }
+        }
 
         setCurrentlySimulating(true)
 
@@ -36,8 +63,10 @@ const Match = () => {
 
         //#region simulate events
         setActivities([])
-        const goals = simulateGoals(userTeam, currEnemyTeam.players)
         const cards = simulateCards(userTeam, currEnemyTeam.players)
+        const filteredCards = filterRepeteadRedCards(cards)
+        const filteredTeams = filterOutRedCardPlayers(filteredCards)
+        const goals = simulateGoals(filteredTeams.filteredUserTeam, filteredTeams.filteredCurrEnemyTeam)
         const allEvents = [...goals, ...cards]
         const playerGoals = allEvents.filter((event) => event.type === 'goal' && event.actor === 'player').length
         const enemyGoals = allEvents.filter((event) => event.type === 'goal' && event.actor === 'enemy').length

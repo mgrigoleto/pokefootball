@@ -4,6 +4,7 @@ import flag from '../../assets/japan-flag.png'
 import { FiPlusCircle } from "react-icons/fi";
 import { LuRefreshCw } from "react-icons/lu";
 import { FaTrash } from "react-icons/fa";
+import { BsStars } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { Position } from '../../helpers/Enums';
 
@@ -67,7 +68,7 @@ const Drafting = () => {
     const [loadingAiTeams, setLoadingAiTeams] = useState(false)
 
     const fetchPokemons = useCallback(async (amount = 16) => {
-        const TOTAL_POKEMONS = 493
+        const TOTAL_POKEMONS = 1025
         let foundPokemons = []
 
         try {
@@ -96,25 +97,28 @@ const Drafting = () => {
 
                 const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
 
+                const isShiny = Math.random() < 0.04
+
                 return {
                     ...poke,
                     id: poke.id,
                     name: poke.name.charAt(0).toUpperCase() + poke.name.slice(1),
-                    image: poke.sprites.other?.[`official-artwork`]?.front_default,
+                    image: isShiny ? poke.sprites.other?.[`official-artwork`]?.front_shiny : poke.sprites.other?.[`official-artwork`]?.front_default,
+                    shiny: isShiny,
                     types: poke.types.map(t => t.type.name),
-                    hp,
-                    attack,
-                    defense,
-                    special_attack,
-                    special_defense,
-                    speed,
-                    original_hp: hp,
-                    original_attack: attack,
-                    original_defense: defense,
-                    original_special_attack: special_attack,
-                    original_special_defense: special_defense,
-                    original_speed: speed,
-                    overall
+                    hp: isShiny ? Math.round(hp * 1.1) : hp,
+                    attack: isShiny ? Math.round(attack * 1.1) : attack,
+                    defense: isShiny ? Math.round(defense * 1.1) : defense,
+                    special_attack: isShiny ? Math.round(special_attack * 1.1) : special_attack,
+                    special_defense: isShiny ? Math.round(special_defense * 1.1) : special_defense,
+                    speed: isShiny ? Math.round(speed * 1.1) : speed,
+                    original_hp: isShiny ? Math.round(hp * 1.1) : hp,
+                    original_attack: isShiny ? Math.round(attack * 1.1) : attack,
+                    original_defense: isShiny ? Math.round(defense * 1.1) : defense,
+                    original_special_attack: isShiny ? Math.round(special_attack * 1.1) : special_attack,
+                    original_special_defense: isShiny ? Math.round(special_defense * 1.1) : special_defense,
+                    original_speed: isShiny ? Math.round(speed * 1.1) : speed,
+                    overall: isShiny ? Math.round(overall * 1.1) : overall,
                 };
             });
 
@@ -132,7 +136,7 @@ const Drafting = () => {
 
     const getRandomPokemons = useCallback(async (amount = 16) => {
         setPokemons([])
-        const TOTAL_POKEMONS = 493
+        const TOTAL_POKEMONS = 1025
         setError(null)
         setLoading(true)
 
@@ -205,6 +209,27 @@ const Drafting = () => {
         } else if ([
             Position.LB,
             Position.RB,
+        ].includes(pokemon.position)) {
+            const hp = Math.round(pokemon.original_hp * 0.7)
+            const attack = Math.round(pokemon.original_attack * 0.9)
+            const defense = Math.round(pokemon.original_defense * 1.1)
+            const special_attack = Math.round(pokemon.original_special_attack * 0.9)
+            const special_defense = Math.round(pokemon.original_special_defense * 1.1)
+            const speed = Math.round(pokemon.original_speed * 1.3)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
+        } else if ([
             Position.LCB,
             Position.RCB
         ].includes(pokemon.position)) {
@@ -253,15 +278,36 @@ const Drafting = () => {
             }
         } else if ([
             Position.LW,
-            Position.ST,
             Position.RW,
         ].includes(pokemon.position)) {
-            const hp = Math.round(pokemon.original_hp * 0.8)
+            const hp = Math.round(pokemon.original_hp * 0.7)
             const attack = Math.round(pokemon.original_attack * 1.2)
             const defense = Math.round(pokemon.original_defense * 0.8)
             const special_attack = Math.round(pokemon.original_special_attack * 1.2)
             const special_defense = Math.round(pokemon.original_special_defense * 0.8)
-            const speed = Math.round(pokemon.original_speed * 1.2)
+            const speed = Math.round(pokemon.original_speed * 1.3)
+
+            const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+            updatedPokemon = {
+                ...updatedPokemon,
+                hp,
+                attack,
+                defense,
+                special_attack,
+                special_defense,
+                speed,
+                overall
+            }
+        }  else if ([
+            Position.ST
+        ].includes(pokemon.position)) {
+            const hp = Math.round(pokemon.original_hp * 1.1)
+            const attack = Math.round(pokemon.original_attack * 1.3)
+            const defense = Math.round(pokemon.original_defense * 0.7)
+            const special_attack = Math.round(pokemon.original_special_attack * 1.3)
+            const special_defense = Math.round(pokemon.original_special_defense * 0.7)
+            const speed = Math.round(pokemon.original_speed * 0.9)
 
             const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
 
@@ -401,6 +447,7 @@ const Drafting = () => {
                                                 </div>
                                                 <div className="player-image-container">
                                                     <img className="player-image" src={pokemon.image} alt={pokemon.name} />
+                                                    {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
                                                 </div>
 
                                                 <label className="name">{pokemon.name}</label>
@@ -550,6 +597,7 @@ const Drafting = () => {
                                         </div>
                                         <div className="player-image-container">
                                             <img className="player-image" src={pokemon.image} alt={pokemon.name} />
+                                            {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
                                         </div>
 
                                         <label className="name">{pokemon.name}</label>
