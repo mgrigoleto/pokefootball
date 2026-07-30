@@ -237,8 +237,7 @@ const Match = () => {
                         <button
                             className='start-game-button'
                             onClick={() => {
-                                simulateMatch()
-                                // navigate("/")
+                                navigate("/")
                             }}
                         >
                             Finish Tournament
