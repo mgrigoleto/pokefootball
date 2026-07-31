@@ -71,9 +71,7 @@ export const recalculateStats = (pokemon) => {
             overall
         }
     } else if ([
-        Position.LM,
         Position.CM,
-        Position.RM,
     ].includes(pokemon.position)) {
         const hp = Math.round(pokemon.original_hp * 1.1)
         const attack = Math.round(pokemon.original_attack * 1.1)
@@ -81,6 +79,29 @@ export const recalculateStats = (pokemon) => {
         const special_attack = Math.round(pokemon.original_special_attack * 0.9)
         const special_defense = Math.round(pokemon.original_special_defense * 0.9)
         const speed = Math.round(pokemon.original_speed * 0.9)
+
+        const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
+
+        updatedPokemon = {
+            ...updatedPokemon,
+            hp,
+            attack,
+            defense,
+            special_attack,
+            special_defense,
+            speed,
+            overall
+        }
+    } else if ([
+        Position.LM,
+        Position.RM,
+    ].includes(pokemon.position)) {
+        const hp = Math.round(pokemon.original_hp * 0.9)
+        const attack = Math.round(pokemon.original_attack * 0.9)
+        const defense = Math.round(pokemon.original_defense * 0.9)
+        const special_attack = Math.round(pokemon.original_special_attack * 1.1)
+        const special_defense = Math.round(pokemon.original_special_defense * 1.1)
+        const speed = Math.round(pokemon.original_speed * 1.1)
 
         const overall = Math.floor((hp + attack + defense + special_attack + special_defense + speed) / 6);
 

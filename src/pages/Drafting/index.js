@@ -9,6 +9,8 @@ import { BsStars } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { Position } from '../../helpers/Enums';
 import { recalculateStats } from './utils';
+import { FaLongArrowAltUp } from "react-icons/fa";
+import { FaLongArrowAltDown } from "react-icons/fa";
 
 const Drafting = () => {
 
@@ -143,7 +145,6 @@ const Drafting = () => {
                     })
             })
         }
-        console.log('enemies', enemies)
         return enemies
     };
 
@@ -236,11 +237,67 @@ const Drafting = () => {
         RW: "20px 0 0 150px",
     }
 
+    const getBuffDebuff = (position, status) => {
+        let arrows = <></>
+        let isBuffed = false
+        let isVeryBuffed = false
+        let isNerfed = false
+        let isVeryNerfed = false
+
+        if (status == 'SPE') {
+            isBuffed = ["LM", "RM"].includes(position)
+            isVeryBuffed = ["LB", "RB", "LW", "RW"].includes(position)
+            isNerfed = ["LCB", "RCB", "ST", "CM"].includes(position)
+            isVeryNerfed = ["GK"].includes(position)
+        }
+        if (status == 'SPD') {
+            isBuffed = ["LB", "RB", "LCB", "RCB", "LM", "RM"].includes(position)
+            isVeryBuffed = ["GK"].includes(position)
+            isNerfed = ["LW", "RW", "CM"].includes(position)
+            isVeryNerfed = ["ST"].includes(position)
+        }
+        if (status == 'SPA') {
+            isBuffed = ["LW", "RW", "LM", "RM"].includes(position)
+            isVeryBuffed = ["ST"].includes(position)
+            isNerfed = ["LB", "RB", "LCB", "RCB", "CM"].includes(position)
+            isVeryNerfed = ["GK"].includes(position)
+        }
+        if (status == 'HP') {
+            isBuffed = ["LCB", "RCB", "CM", "ST"].includes(position)
+            isVeryBuffed = ["GK"].includes(position)
+            isNerfed = ["LM", "RM"].includes(position)
+            isVeryNerfed = ["LB", "RB", "LW", "RW"].includes(position)
+        }
+        if (status == 'ATK') {
+            isBuffed = ["CM", "LW", "RW"].includes(position)
+            isVeryBuffed = ["ST"].includes(position)
+            isNerfed = ["LB", "RB", "LCB", "RCB", "LM", "RM"].includes(position)
+            isVeryNerfed = ["GK"].includes(position)
+        }
+        if (status == 'DEF') {
+            isBuffed = ["LB", "RB", "LCB", "RCB", "CM"].includes(position)
+            isVeryBuffed = ["GK"].includes(position)
+            isNerfed = ["LM", "RM", "LW", "RW"].includes(position)
+            isVeryNerfed = ["ST"].includes(position)
+        }
+
+        arrows =
+            isBuffed ?
+                <><FaLongArrowAltUp /><FaLongArrowAltUp /></>
+                : isVeryBuffed ?
+                    <><FaLongArrowAltUp /><FaLongArrowAltUp /><FaLongArrowAltUp /></>
+                    : isNerfed ?
+                        <><FaLongArrowAltDown /><FaLongArrowAltDown /></>
+                        : isVeryNerfed ?
+                            <><FaLongArrowAltDown /><FaLongArrowAltDown /><FaLongArrowAltDown /></>
+                            : <></>
+
+        return arrows
+    }
+
     const renderPokemonCard = (pokemon) => {
 
         const ranking = getRankingClass(pokemon.overall);
-
-        console.log('margin', customMarginPerPosition[pokemon.position])
 
         return (
             <div
@@ -255,6 +312,7 @@ const Drafting = () => {
                 {
                     pokemon.name ?
                         <div className={`fifa-card-content ${ranking}`}>
+                            {pokemon.shiny && <div className='shiny-badge'>SHINY <BsStars /></div>}
                             <div className="card-top">
                                 <div className="card-badge">
                                     <span className="rating">{pokemon.overall}</span>
@@ -277,7 +335,6 @@ const Drafting = () => {
                             </div>
                             <div className="player-image-container">
                                 <img className="player-image" src={pokemon.image} alt={pokemon.name} />
-                                {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
                             </div>
 
                             <label className="name">{pokemon.name}</label>
@@ -355,30 +412,30 @@ const Drafting = () => {
                                 <div className="stat-col">
                                     <div>
                                         <span><b>HP</b></span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "HP")}</small>
                                     </div>
                                     <div>
                                         <span><b>ATK</b> </span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "ATK")}</small>
                                     </div>
                                     <div>
                                         <span><b>DEF</b> </span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "DEF")}</small>
                                     </div>
                                 </div>
                                 <hr></hr>
                                 <div className="stat-col">
                                     <div>
                                         <span><b>SPA</b> </span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "SPA")}</small>
                                     </div>
                                     <div>
                                         <span><b>SPD</b> </span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "SPD")}</small>
                                     </div>
                                     <div>
                                         <span><b>SPE</b> </span>
-                                        <span>??</span>
+                                        <small>{getBuffDebuff(pokemon.position, "SPE")}</small>
                                     </div>
                                 </div>
                             </div>
@@ -477,6 +534,7 @@ const Drafting = () => {
                                     onDragStart={(e) => handleDragFromPool(e, pokemon)}
                                 >
                                     <div className={`fifa-card-content ` + ranking}>
+                                            {pokemon.shiny && <div className='shiny-badge'>SHINY <BsStars /></div>}
 
                                         <div className="card-top">
                                             <div className="card-badge">
@@ -488,7 +546,6 @@ const Drafting = () => {
                                         </div>
                                         <div className="player-image-container">
                                             <img className="player-image" src={pokemon.image} alt={pokemon.name} />
-                                            {pokemon.shiny && <div className='shiny-badge'><BsStars /></div>}
                                         </div>
 
                                         <label className="name">{pokemon.name}</label>
