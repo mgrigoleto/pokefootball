@@ -38,6 +38,8 @@ const Drafting = () => {
     const [refreshUsed, setRefreshUsed] = useState(0)
     const [loadingAiTeams, setLoadingAiTeams] = useState(false)
 
+    const readyButtonRef = useRef(null)
+
     const fetchPokemons = useCallback(async (amount = 24) => {
         const TOTAL_POKEMONS = 1025
         let foundPokemons = []
@@ -445,6 +447,16 @@ const Drafting = () => {
         )
     }
 
+    useEffect(() => {
+        if (readyButtonRef.current && userTeam.every((player) => !!player.name)) {
+            console.log('scrolled')
+            readyButtonRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'end'
+            });
+        }
+    }, [userTeam])
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className='drafting-container'>
@@ -534,7 +546,7 @@ const Drafting = () => {
                                     onDragStart={(e) => handleDragFromPool(e, pokemon)}
                                 >
                                     <div className={`fifa-card-content ` + ranking}>
-                                            {pokemon.shiny && <div className='shiny-badge'>SHINY <BsStars /></div>}
+                                        {pokemon.shiny && <div className='shiny-badge'>SHINY <BsStars /></div>}
 
                                         <div className="card-top">
                                             <div className="card-badge">
@@ -589,23 +601,26 @@ const Drafting = () => {
                 </div>
             </div >
 
-            <button
-                className='ready-button'
-                onClick={async () => {
-                    setLoadingAiTeams(true)
-                    const aiTeams = await generateAITeams()
+            <div ref={readyButtonRef} style={{ width: '100%' }}>
+                <button
+                    className='ready-button'
+                    onClick={async () => {
+                        setLoadingAiTeams(true)
+                        const aiTeams = await generateAITeams()
 
-                    navigate("/match", {
-                        state: {
-                            userTeam,
-                            aiTeams
-                        },
-                    })
-                }}
-                disabled={!userTeam.every((pkm) => pkm.name != undefined)}
-            >
-                {loadingAiTeams ? <span className="spinner-card-black"></span> : "I'M READY!"}
-            </button>
+                        navigate("/match", {
+                            state: {
+                                userTeam,
+                                aiTeams
+                            },
+                        })
+                    }}
+                    disabled={!userTeam.every((pkm) => pkm.name != undefined)}
+                >
+                    {loadingAiTeams ? <span className="spinner-card-black"></span> : "I'M READY!"}
+                </button>
+            </div>
+
         </div>
     )
 }

@@ -369,6 +369,7 @@ h2 {
     font-family: inherit;
     padding: 15px 25px;
     font-size: 36px;
+    width: 100%;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s ease-in-out;
