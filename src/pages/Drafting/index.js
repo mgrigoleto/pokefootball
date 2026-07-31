@@ -450,7 +450,7 @@ const Drafting = () => {
             <div className='drafting-container'>
                 <div style={{ width: '50%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        <h1>BUILD YOUR TEAM TEAM</h1>
+                        <h1>BUILD YOUR TEAM</h1>
                         <button
                             className='reset-button'
                             onClick={() => setUserTeam(initialTeamArray)}
